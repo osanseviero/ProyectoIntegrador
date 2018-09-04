@@ -1,0 +1,46 @@
+name: proyectoIntegrador
+channels:
+- anaconda
+- conda-forge
+- anaconda-fusion
+- defaults
+dependencies:
+- pandas=0.23.4=py36h6440ff4_0
+- python-dateutil=2.7.3=py36_0
+- pytz=2018.5=py36_0
+- absl-py=0.4.1=py_0
+- astor=0.7.1=py_0
+- c-ares=1.14.0=h470a237_0
+- gast=0.2.0=py_0
+- grpcio=1.14.1=py36hd60e7a3_0
+- libprotobuf=3.6.0=hd28b015_0
+- markdown=2.6.11=py_0
+- protobuf=3.6.0=py36hfc679d8_0
+- six=1.11.0=py36_1
+- tensorboard=1.10.0=py36_0
+- tensorflow=1.10.0=py36_0
+- termcolor=1.1.0=py_2
+- werkzeug=0.14.1=py_0
+- ca-certificates=2018.03.07=0
+- certifi=2018.8.24=py36_1
+- libcxx=4.0.1=h579ed51_0
+- libcxxabi=4.0.1=hebd6815_0
+- libedit=3.1.20170329=hb402a30_2
+- libffi=3.2.1=h475c297_4
+- libgfortran=3.0.1=h93005f0_2
+- libopenblas=0.2.20=hdc02c5d_7
+- ncurses=6.1=h0a44026_0
+- numpy=1.14.3=py36he6379a5_1
+- numpy-base=1.14.3=py36h7ef55bc_1
+- openssl=1.0.2p=h1de35cc_0
+- pip=10.0.1=py36_0
+- python=3.6.6=hc167b69_0
+- readline=7.0=h1de35cc_5
+- setuptools=40.2.0=py36_0
+- sqlite=3.24.0=ha441bb4_0
+- tk=8.6.8=ha441bb4_0
+- wheel=0.31.1=py36_0
+- xz=5.2.4=h1de35cc_4
+- zlib=1.2.11=hf3cbc9b_2
+prefix: /Users/osanseviero/anaconda3/envs/proyectoIntegrador
+

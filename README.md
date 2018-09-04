@@ -1,7 +1,9 @@
 # ProyectoIntegrador
 
-conda create --name proyectoIntegrador --file requirements.txt
-source activate proyectoIntegrador
+```conda env create -f environment.yml```
+
+Mac: ```source activate proyectoIntegrador```
+Windows: ```activate proyectoIntegrador```
 
 If dependencies are updated, run
-conda list --export > requirements.txt
+```conda env export > environment.yml```
