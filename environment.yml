@@ -3,6 +3,7 @@ channels:
 - anaconda
 - conda-forge
 - anaconda-fusion
+- kpurdon
 - defaults
 dependencies:
 - pandas=0.23.4
