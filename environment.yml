@@ -9,3 +9,5 @@ dependencies:
 - tensorflow=1.10.0
 - numpy=1.14.3
 - python=3.6.6
+- flask=1.0.2
+- flask-pymongo=0.3.1
