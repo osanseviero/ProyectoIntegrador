@@ -1,4 +1,5 @@
 from flask import render_template, request, redirect, url_for
+from flask.ext.bcrypt import Bcrypt
 from app import app, mongo
 
 # Encrypt password, check fields
@@ -11,7 +12,8 @@ def register():
         if not mongo.db.users.count({"$or": [{"email": email}, {"username": username}]}):
             name = request.form['name']
             password = request.form['password']
-            mongo.db.users.insert_one({"name": name, "password": password, "email": email, "username": username})
+            bcrypt = Bcrypt(app)
+            mongo.db.users.insert_one({"name": name, "password": bcrypt.generate_password_hash(password), "email": email, "username": username})
             return redirect(url_for('login'))
         else:
             error = "Username or email already in use"
