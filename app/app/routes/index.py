@@ -1,6 +1,5 @@
 from flask import render_template, request, redirect, session
 from app import app, mongo
-from pprint import pprint
 
 @app.route('/')
 def index():
@@ -21,8 +20,9 @@ def login():
         if not mongo.db.users.count({field: user}):
             error = "No user found with those credentials"
         else:
-            mongo.db.users.find_one({field: user})
-            pprint(user)
+            user = mongo.db.users.find_one({field: user})
+            session["name"] = user["name"]
+            session["username"] = user["username"]
             return redirect('/')
     return render_template('login.html', error=error)
 
