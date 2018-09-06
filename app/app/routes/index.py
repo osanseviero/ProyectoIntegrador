@@ -18,10 +18,10 @@ def login():
             field = "username"
         else:
             field = "email"
-        if mongo.db.users.count({field: user}):
+        if not mongo.db.users.count({field: user}):
             error = "No user found with those credentials"
         else:
-            user = mongo.db.users.find_one({field: user})
+            mongo.db.users.find_one({field: user})
             pprint(user)
             return redirect('/')
     return render_template('login.html', error=error)

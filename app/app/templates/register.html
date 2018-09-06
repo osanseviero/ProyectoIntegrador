@@ -4,6 +4,11 @@
 {% endblock %}
 {% block title %}Join us today!{% endblock %}
 {% block content %}
+    {% if error %}
+        <div class="alert alert-danger">
+            <strong>{{ error }}</strong>
+        </div>
+    {% endif %}
     <div class="c-form-register pt-5 text-center">
         <form action="{{ url_for('register') }}" method="post" class="bg-light border border-secondary rounded p-4">
             <h1 class="h3 pb-3">Register now!</h1>
