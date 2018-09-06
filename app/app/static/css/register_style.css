@@ -1,11 +1,16 @@
 body {
+    /* background-color: green; */
+}
+
+.c-form-register {
     display: -ms-flexbox;
     display: flex;
     -ms-flex-align: center;
     align-items: center;
 }
 
-.c-form-register {
+.c-form-register form {
     width: 100%;
     max-width: 330px;
+    margin: auto;
 }

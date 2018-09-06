@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block css %}
+    <link rel="stylesheet" href="../static/css/register_style.css">
+{% endblock %}
+{% block title %}Enter login{% endblock %}
+{% block content %}
+    <div class="c-form-register pt-5 text-center">
+        <form action="{{ url_for('register') }}" method="post" class="bg-light border border-secondary rounded p-4">
+            <h1 class="h3 pb-3">WebML</h1>
+            <div class="form-group">
+                <label for="name" class="sr-only">Username or email</label>
+                <input type="text" name="name" id="inputName" class="form-control" placeholder="Username or email" required autofocus>
+            </div>
+            <div class="form-group">
+                <label for="inputPassword" class="sr-only">Password</label>
+                <input type="password" name="password" id="inputPassword" class="form-control" placeholder="Password" required>
+            </div>
+            <button class="btn btn-lg btn-primary btn-block" type="submit">Login</button>
+        </form>
+    </div>
+{% endblock %}
