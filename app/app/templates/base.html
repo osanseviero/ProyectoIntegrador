@@ -1,17 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
+<style>
+    *{padding: 0; margin: 0;}
+</style>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
     {% block css %} {% endblock %}
     <title> {% block title %} {% endblock %} </title>
 </head>
 <body>
-    <header>Page header</header>
-    <main>
+    <header class="sticky-top">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a href="#" class="navbar-brand p-0">
+                <img src="../static/brain.png" height="32" width="32" alt="">
+                <span class="align-content-center">WebML</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggler" aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarToggler">
+                <div class="navbar-nav mr-auto">
+                    <a href="#" class="nav-item nav-link active mr-auto">Home<span class="sr-only">(current)</span></a>
+                </div>
+                <div class="navbar-nav">
+                    <a href="#" class="nav-item nav-link">Login</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <main role="main" class="container" style="min-height: calc(100vh - 160px)">
         {% block content %} {% endblock %}
     </main>
-    <footer>Page footer (copyright and shit)</footer>
+    <footer class="bg-light text-muted py-4 sticky-bottom">
+        <div class="container">
+            <span>Page footer (copyright and shit)</span>
+            <div>Icons made by <a href="https://www.flaticon.com/authors/darius-dan" title="Darius Dan">Darius Dan</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
+        </div>
+    </footer>
+    
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+    {% block script %} {% endblock %}
 </body>
 </html>
