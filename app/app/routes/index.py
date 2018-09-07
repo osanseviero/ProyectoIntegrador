@@ -1,13 +1,16 @@
-from flask import render_template, request, redirect, session
+from flask import render_template, request, redirect
 from app import app, mongo
+from .sessions import *
 
 @app.route('/')
 def index():
+    user = getCurrentSessionUser()
     name = None
-    if "name" in session:
-        name = session["name"]
+    if user:
+        name = user["name"]
     return render_template('index.html', name=name)
 
+# Validate fields
 @app.route('/login', methods=["GET","POST"])
 def login():
     error = None
@@ -17,21 +20,23 @@ def login():
             field = "username"
         else:
             field = "email"
-        if not mongo.db.users.count({field: user}):
-            error = "No user found with those credentials"
-        else:
+        if mongo.db.users.count({field: user}):
             user = mongo.db.users.find_one({field: user})
-            session["name"] = user["name"]
-            session["username"] = user["username"]
+            createSession(user)
             return redirect('/')
+        else:
+            error = "No user found with those credentials"
     return render_template('login.html', error=error)
 
 @app.route('/logout')
 def logout():
-    session.pop("name", None)
-    session.pop("token", None)
+    removeSession()
     return redirect('/')
 
 @app.errorhandler(404)
 def page_not_found(e):
-    return render_template('404.html'), 404
+    user = getCurrentSessionUser()
+    name = None
+    if user:
+        name = user["name"]
+    return render_template('404.html', name=name), 404
