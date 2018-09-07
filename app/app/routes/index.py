@@ -1,4 +1,4 @@
-from flask import render_template, request, redirect, session
+from flask import render_template, request, redirect
 from app import app, mongo
 from .sessions import *
 
