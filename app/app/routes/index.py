@@ -26,6 +26,8 @@ def login():
             return redirect('/')
         else:
             error = "No user found with those credentials"
+    if "error" in request.args:
+        error = request.args.get("error")
     return render_template('login.html', error=error)
 
 @app.route('/logout')

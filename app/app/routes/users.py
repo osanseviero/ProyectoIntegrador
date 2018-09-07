@@ -23,4 +23,4 @@ def profile():
     user = getCurrentSessionUser()
     if user:
         return render_template('profile.html', user=user)
-    return redirect(url_for('login'), error="You must login first")
+    return redirect(url_for('login', error="You must login first"))
