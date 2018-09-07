@@ -11,9 +11,9 @@
             <div class="navbar-nav mr-auto">
                 <a href="/" class="nav-item nav-link active mr-auto">Home<span class="sr-only">(current)</span></a>
             </div>
-            {% if name %}
+            {% if name or user["name"] %}
                 <div class="navbar-nav">
-                    <a href="/profile" class="nav-item nav-link text-capitalize">{{ name }}</a>
+                    <a href="/users/profile" class="nav-item nav-link text-capitalize">{{ name or user["name"] }}</a>
                 </div>
                 <div class="navbar-nav">
                     <a href="/logout" class="nav-item nav-link">Logout</a>

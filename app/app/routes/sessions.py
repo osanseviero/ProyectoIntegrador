@@ -5,7 +5,7 @@ from uuid import uuid4
 def getCurrentSessionUser():
     user = None
     if "token" in session:
-        current_session = mongo.db.session.find_one({"token": session["token"]})
+        current_session = mongo.db.sessions.find_one({"token": session["token"]})
         if current_session:
             user = mongo.db.users.find_one({"_id": current_session["user_id"]}, {"password": 0})
     return user
