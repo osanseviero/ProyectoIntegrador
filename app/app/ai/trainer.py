@@ -23,6 +23,7 @@ def construct_feature_columns(feature_names):
         feature_columns.append(tf.feature_column.numeric_column(key=name))
     return feature_columns
 
+
 def get_input_fn(features, labels, batch_size, shuffle=True):
     """Creates a TensorFlow Estimator input_fn.
     Args:
@@ -49,6 +50,21 @@ def get_input_fn(features, labels, batch_size, shuffle=True):
         return dataset.make_one_shot_iterator().get_next()
     return input_fn
 
+
+def get_classifier_estimator(hparams, feature_columns, label_names, classes):
+    """Creates a TF Estimator classifier based on the hyperparameters
+    Args:
+      hparams: A HParams object with the model hyperparameters.
+      feature_columns: TensorFlow feature columns.
+      label_names: A list of strings with the label names.
+      classes: The number of possible classification classes.
+    """
+    if hparams.model_type == 'baseline':
+        return models.get_baseline_classifier(label_names, classes)
+    elif hparams.model_type == 'NN':
+        return models.get_dnn_classifier(feature_columns, label_names, classes)
+
+
 def run_tf_model(hparams):
     """Implements and trains TensorFlow estimator and prints metrics.
     """
@@ -58,7 +74,9 @@ def run_tf_model(hparams):
     feature_columns = construct_feature_columns(config.feature_names)
 
     # Configure estimator.
-    estimator = models.get_dnn_classifier(feature_columns, config.label_names)
+    # TODO(osanseviero): Determine the number of classes in config
+    estimator = get_classifier_estimator(hparams, feature_columns, config.label_names, 3)
+    
 
     # Training and evaluation specs.
     train_spec = tf.estimator.TrainSpec(input_fn=get_input_fn(config.train_x,
