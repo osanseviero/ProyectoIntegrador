@@ -5,7 +5,6 @@ based on them.
 """
 
 import tensorflow as tf
-import pandas as pd
 import models
 from trainer_config import TrainerConfig
 
@@ -52,15 +51,15 @@ def get_input_fn(features, labels, batch_size, shuffle=True):
 def run_tf_model():
     """Implements and trains TensorFlow estimator and prints metrics.
     """
-    label_index = 4
     config = TrainerConfig(categorical=True, csv_path=CSV_PATH, label_idx=4)
-    
+
+    # TODO(osanseviero): Implement support for categorical features.
     feature_columns = construct_feature_columns(config.feature_names)
 
-    # Configure estimator
+    # Configure estimator.
     estimator = models.get_dnn_classifier(feature_columns, config.label_names)
 
-    # Training and evaluation specs
+    # Training and evaluation specs.
     train_spec = tf.estimator.TrainSpec(input_fn=get_input_fn(config.train_x,
                                                               config.train_y,
                                                               batch_size=1000,
@@ -72,12 +71,11 @@ def run_tf_model():
                                                             1),
                                       steps=config.evaluation_steps)
 
-    # TODO(osanseviero): Implement ExportStrategy
+    # TODO(osanseviero): Implement ExportStrategy.
     metrics = tf.estimator.train_and_evaluate(estimator, train_spec, eval_spec)
     print(metrics)
 
 def main():
-    """Main function"""
     run_tf_model()
 
 

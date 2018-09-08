@@ -32,5 +32,8 @@ class TestTrainerCase(unittest.TestCase):
             # Data should repeat itself
             self.assertCountEqual(sess.run(feature_tensor), [1, 2])
 
+    # TODO(osanseviero): Add tests for errors
+    # TODO(osanseviero): Add tests for construct_feature_columns
+
 if __name__ == '__main__':
     unittest.main()
