@@ -6,6 +6,7 @@ based on them.
 
 import tensorflow as tf
 import models
+from hparams import HParams
 from trainer_config import TrainerConfig
 
 # Data downloaded from https://archive.ics.uci.edu/ml/machine-learning-databases/iris/
@@ -48,7 +49,7 @@ def get_input_fn(features, labels, batch_size, shuffle=True):
         return dataset.make_one_shot_iterator().get_next()
     return input_fn
 
-def run_tf_model():
+def run_tf_model(hparams):
     """Implements and trains TensorFlow estimator and prints metrics.
     """
     config = TrainerConfig(categorical=True, csv_path=CSV_PATH, label_idx=4)
@@ -62,9 +63,9 @@ def run_tf_model():
     # Training and evaluation specs.
     train_spec = tf.estimator.TrainSpec(input_fn=get_input_fn(config.train_x,
                                                               config.train_y,
-                                                              batch_size=1000,
+                                                              batch_size=hparams.batch_size,
                                                               shuffle=False),
-                                        max_steps=100)
+                                        max_steps=hparams.train_steps)
 
     eval_spec = tf.estimator.EvalSpec(input_fn=get_input_fn(config.test_x,
                                                             config.test_y,
@@ -76,8 +77,9 @@ def run_tf_model():
     print(metrics)
 
 def main():
-    run_tf_model()
+    hparams = HParams(batch_size=1000, train_steps=100)
+    run_tf_model(hparams)
 
 
 if __name__ == "__main__":
-    run_tf_model()
+    main()
