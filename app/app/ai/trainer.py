@@ -7,10 +7,10 @@ based on them.
 import tensorflow as tf
 import pandas as pd
 import models
+from trainer_config import TrainerConfig
 
 # Data downloaded from https://archive.ics.uci.edu/ml/machine-learning-databases/iris/
-TRAIN_URL = "data/iris-training.csv"
-TEST_URL = "data/iris-testing.csv"
+CSV_PATH = "data/iris.csv"
 
 def construct_feature_columns(feature_names):
     """Creates feature columns to be given to a tf.Estimator.
@@ -52,32 +52,25 @@ def get_input_fn(features, labels, batch_size, shuffle=True):
 def run_tf_model():
     """Implements and trains TensorFlow estimator and prints metrics.
     """
-    train_df = pd.read_csv(TRAIN_URL)
-    test_df = pd.read_csv(TEST_URL)
-
-    # Split into features and labels
-    train_x = train_df.drop([train_df.columns[4]], axis=1)
-    train_y = train_df[train_df.columns[4]]
-    test_x = test_df.drop(test_df.columns[4], axis=1)
-    test_y = test_df[test_df.columns[4]]
-
-    # Get label names and feature columns
-    label_names = ['Iris-setosa', 'Iris-versicolor', 'Iris-virginica']
-    feature_names = ['sepal_length', 'sepal_width', 'petal_length', 'petal_width']
-    feature_columns = construct_feature_columns(feature_names)
+    label_index = 4
+    config = TrainerConfig(categorical=True, csv_path=CSV_PATH, label_idx=4)
+    
+    feature_columns = construct_feature_columns(config.feature_names)
 
     # Configure estimator
-    estimator = models.get_dnn_classifier(feature_columns, label_names)
+    estimator = models.get_dnn_classifier(feature_columns, config.label_names)
 
     # Training and evaluation specs
-    train_spec = tf.estimator.TrainSpec(input_fn=get_input_fn(train_x,
-                                                              train_y,
-                                                              100),
+    train_spec = tf.estimator.TrainSpec(input_fn=get_input_fn(config.train_x,
+                                                              config.train_y,
+                                                              batch_size=1000,
+                                                              shuffle=False),
                                         max_steps=100)
-    eval_spec = tf.estimator.EvalSpec(input_fn=get_input_fn(test_x,
-                                                            test_y,
-                                                            25,
-                                                            shuffle=False))
+
+    eval_spec = tf.estimator.EvalSpec(input_fn=get_input_fn(config.test_x,
+                                                            config.test_y,
+                                                            1),
+                                      steps=config.evaluation_steps)
 
     # TODO(osanseviero): Implement ExportStrategy
     metrics = tf.estimator.train_and_evaluate(estimator, train_spec, eval_spec)
@@ -89,4 +82,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    run_tf_model()

@@ -10,7 +10,7 @@ def get_dnn_classifier(feature_columns, label_names):
     Args:
       feature_columns: A list of tf.feature_columns.
       label_names: A list with the label names.
-    Returns: A tf.estimator
+    Returns: A tf.Estimator
     """
     classifier = tf.estimator.DNNClassifier(
         feature_columns=feature_columns,
