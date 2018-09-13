@@ -27,9 +27,10 @@ class TrainerConfig():
         self.test_y = test_df[test_df.columns[label_idx]]
 
         # TODO(osanseviero): Implement support for regression
-        # Obtain possible label names.
         if categorical:
             self.label_names = list(self.train_y.unique())
+            self.classes = len(self.label_names)
+            self.classification = True
 
         # Obtain feature names.
         self.feature_names = list(self.train_x.columns.values)

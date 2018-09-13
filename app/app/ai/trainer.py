@@ -63,6 +63,10 @@ def get_classifier_estimator(hparams, feature_columns, label_names, classes):
         return models.get_baseline_classifier(label_names, classes)
     elif hparams.model_type == 'NN':
         return models.get_dnn_classifier(feature_columns, label_names, classes)
+    elif hparams.model_type == 'BoostedTrees':
+        return models.get_boosted_tree_classifier(feature_columns, label_names, classes)
+    elif hparams.model_type == 'Linear':
+        return models.get_dnn_classifier(feature_columns, label_names, classes)
 
 
 def run_tf_model(hparams):
@@ -74,9 +78,10 @@ def run_tf_model(hparams):
     feature_columns = construct_feature_columns(config.feature_names)
 
     # Configure estimator.
-    # TODO(osanseviero): Determine the number of classes in config
-    estimator = get_classifier_estimator(hparams, feature_columns, config.label_names, 3)
-    
+    if config.classification:
+        estimator = get_classifier_estimator(hparams, feature_columns, config.label_names,
+                                             config.classes)
+
 
     # Training and evaluation specs.
     train_spec = tf.estimator.TrainSpec(input_fn=get_input_fn(config.train_x,
