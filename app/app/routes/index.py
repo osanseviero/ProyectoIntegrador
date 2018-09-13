@@ -42,3 +42,6 @@ def page_not_found(e):
     if user:
         name = user["name"]
     return render_template('404.html', name=name), 404
+
+
+# Status 405 for methods not allowed

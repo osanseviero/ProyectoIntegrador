@@ -1,4 +1,4 @@
-from flask import render_template, request, redirect, url_for
+from flask import render_template, request, redirect, url_for, jsonify
 from app import app, mongo
 from .sessions import getCurrentSessionUser
 
@@ -24,3 +24,25 @@ def profile():
     if user:
         return render_template('profile.html', user=user)
     return redirect(url_for('login', error="You must login first"))
+
+# Dunno if have to validate if update was successful
+@app.route('/users/update', methods=["PUT"])
+def update_user():
+    user = getCurrentSessionUser()
+    if user:
+        name = request.form["name"] or user["name"]
+        username = request.form["username"] or user["username"]
+        email = request.form["email"] or user["email"]
+        password = request.form["password"] or user["password"]
+        mongo.db.users.update_one({"_id": user["_id"]}, {"name": name, "password": password, "email": email, "username": username})
+        return jsonify(status="Success")
+    return jsonify(status="Error")
+
+# Dunno if have to validate if delete was successful
+@app.route('/users/delete')
+def delete_user():
+    user = getCurrentSessionUser()
+    if user:
+        mongo.db.users.delete_one({"_id": user["_id"]})
+        return jsonify(status="Success")
+    return jsonify(status = "Error")
