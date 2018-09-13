@@ -5,12 +5,12 @@ based on them.
 """
 
 import tensorflow as tf
-import pandas as pd
 import models
+from hparams import HParams
+from trainer_config import TrainerConfig
 
 # Data downloaded from https://archive.ics.uci.edu/ml/machine-learning-databases/iris/
-TRAIN_URL = "data/iris-training.csv"
-TEST_URL = "data/iris-testing.csv"
+CSV_PATH = "data/iris.csv"
 
 def construct_feature_columns(feature_names):
     """Creates feature columns to be given to a tf.Estimator.
@@ -22,6 +22,7 @@ def construct_feature_columns(feature_names):
     for name in feature_names:
         feature_columns.append(tf.feature_column.numeric_column(key=name))
     return feature_columns
+
 
 def get_input_fn(features, labels, batch_size, shuffle=True):
     """Creates a TensorFlow Estimator input_fn.
@@ -49,43 +50,58 @@ def get_input_fn(features, labels, batch_size, shuffle=True):
         return dataset.make_one_shot_iterator().get_next()
     return input_fn
 
-def run_tf_model():
+
+def get_classifier_estimator(hparams, feature_columns, label_names, classes):
+    """Creates a TF Estimator classifier based on the hyperparameters
+    Args:
+      hparams: A HParams object with the model hyperparameters.
+      feature_columns: TensorFlow feature columns.
+      label_names: A list of strings with the label names.
+      classes: The number of possible classification classes.
+    """
+    if hparams.model_type == 'baseline':
+        return models.get_baseline_classifier(label_names, classes)
+    elif hparams.model_type == 'NN':
+        return models.get_dnn_classifier(feature_columns, label_names, classes)
+    elif hparams.model_type == 'BoostedTrees':
+        return models.get_boosted_tree_classifier(feature_columns, label_names, classes)
+    elif hparams.model_type == 'Linear':
+        return models.get_dnn_classifier(feature_columns, label_names, classes)
+
+
+def run_tf_model(hparams):
     """Implements and trains TensorFlow estimator and prints metrics.
     """
-    train_df = pd.read_csv(TRAIN_URL)
-    test_df = pd.read_csv(TEST_URL)
+    config = TrainerConfig(categorical=True, csv_path=CSV_PATH, label_idx=4)
 
-    # Split into features and labels
-    train_x = train_df.drop([train_df.columns[4]], axis=1)
-    train_y = train_df[train_df.columns[4]]
-    test_x = test_df.drop(test_df.columns[4], axis=1)
-    test_y = test_df[test_df.columns[4]]
+    # TODO(osanseviero): Implement support for categorical features.
+    feature_columns = construct_feature_columns(config.feature_names)
 
-    # Get label names and feature columns
-    label_names = ['Iris-setosa', 'Iris-versicolor', 'Iris-virginica']
-    feature_names = ['sepal_length', 'sepal_width', 'petal_length', 'petal_width']
-    feature_columns = construct_feature_columns(feature_names)
+    # Configure estimator.
+    if config.classification:
+        estimator = get_classifier_estimator(hparams, feature_columns, config.label_names,
+                                             config.classes)
 
-    # Configure estimator
-    estimator = models.get_dnn_classifier(feature_columns, label_names)
 
-    # Training and evaluation specs
-    train_spec = tf.estimator.TrainSpec(input_fn=get_input_fn(train_x,
-                                                              train_y,
-                                                              100),
-                                        max_steps=100)
-    eval_spec = tf.estimator.EvalSpec(input_fn=get_input_fn(test_x,
-                                                            test_y,
-                                                            25,
-                                                            shuffle=False))
+    # Training and evaluation specs.
+    train_spec = tf.estimator.TrainSpec(input_fn=get_input_fn(config.train_x,
+                                                              config.train_y,
+                                                              batch_size=hparams.batch_size,
+                                                              shuffle=False),
+                                        max_steps=hparams.train_steps)
 
-    # TODO(osanseviero): Implement ExportStrategy
+    eval_spec = tf.estimator.EvalSpec(input_fn=get_input_fn(config.test_x,
+                                                            config.test_y,
+                                                            1),
+                                      steps=config.evaluation_steps)
+
+    # TODO(osanseviero): Implement ExportStrategy.
     metrics = tf.estimator.train_and_evaluate(estimator, train_spec, eval_spec)
     print(metrics)
 
 def main():
-    """Main function"""
-    run_tf_model()
+    hparams = HParams(batch_size=1000, train_steps=100)
+    run_tf_model(hparams)
 
 
 if __name__ == "__main__":
