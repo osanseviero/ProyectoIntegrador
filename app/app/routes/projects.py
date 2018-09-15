@@ -1,5 +1,5 @@
 from flask import render_template, request, redirect, url_for
-from app import app, mongo
+from app import app
 from .sessions import *
 
 @app.route('/projects')
@@ -29,7 +29,7 @@ def create_project():
                 "filePath": "",
                 "type": request.form["type"]
             }
-            mongo.db.users.update_one({"_id": user["_id"]}, {"$push": {"projects": project_object}})
+            app.mongo.db.users.update_one({"_id": user["_id"]}, {"$push": {"projects": project_object}})
             return redirect('/projects/' + str(new_id))
         return render_template('createProject.html', name=user["name"])
     return redirect(url_for('login', error="You must login first"))
@@ -49,8 +49,8 @@ def get_project(project_id):
     return redirect(url_for('login', error="You must login first"))
 
 def autoIncrement(field):
-    mongo.db.counters.update_one({"_id": field}, {"$inc" : {"value": 1}})
-    counter = mongo.db.counters.find_one({"_id": field})
+    app.mongo.db.counters.update_one({"_id": field}, {"$inc" : {"value": 1}})
+    counter = app.mongo.db.counters.find_one({"_id": field})
     return counter["value"]
 
 # Ver que pedo, como guardar CSV

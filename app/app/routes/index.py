@@ -1,5 +1,5 @@
 from flask import render_template, request, redirect
-from app import app, mongo
+from app import app
 from .sessions import *
 
 @app.route('/')
@@ -20,8 +20,8 @@ def login():
             field = "username"
         else:
             field = "email"
-        if mongo.db.users.count({field: user}):
-            user = mongo.db.users.find_one({field: user})
+        if app.mongo.db.users.count({field: user}):
+            user = app.mongo.db.users.find_one({field: user})
             createSession(user)
             return redirect('/')
         else:
