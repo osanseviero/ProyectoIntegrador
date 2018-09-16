@@ -2,12 +2,13 @@ from flask import session
 from app import app
 from uuid import uuid4
 
-def getCurrentSessionUser():
+def getCurrentSessionUser(include_projects = 0):
     user = None
     if "token" in session:
         current_session = app.mongo.db.sessions.find_one({"token": session["token"]})
         if current_session:
-            user = app.mongo.db.users.find_one({"_id": current_session["user_id"]}, {"password": 0})
+            user = app.mongo.db.users.find_one({"_id": current_session["user_id"]}, {"password": 0, "projects": include_projects})
+            print(user)
     return user
 
 def removeSession():

@@ -2,6 +2,7 @@ from flask import render_template, request, redirect, url_for, jsonify
 from app import app
 from .sessions import getCurrentSessionUser, removeSession
 
+# Maybe create directory to store csv's for each user
 # Encrypt password, validate fields
 @app.route('/register', methods=["GET", "POST"])
 def register():
@@ -20,7 +21,7 @@ def register():
 
 @app.route('/users/profile')
 def profile():
-    user = getCurrentSessionUser()
+    user = getCurrentSessionUser(include_projects = 1)
     if user:
         return render_template('profile.html', user=user)
     return redirect(url_for('login', error="You must login first"))

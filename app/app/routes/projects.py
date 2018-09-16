@@ -1,10 +1,12 @@
 from flask import render_template, request, redirect, url_for
 from app import app
 from .sessions import *
+from werkzeug.utils import secure_filename
+import os
 
 @app.route('/projects')
 def get_projects():
-    user = getCurrentSessionUser()
+    user = getCurrentSessionUser(include_projects = 1)
     if user:
         error = None
         projects = []
@@ -21,8 +23,9 @@ def create_project():
     if user:
         if request.method == "POST":
             # Preguntar a arthur cuales son los nombres de los campos
-            # Guardar CSV aqui o por aqui
             new_id = autoIncrement("projectId")
+            if not saveCSV(user["username"], new_id):
+                return render_template('createProject.html', name=user["name"], error="Server error storing csv, try again later please")
             project_object = {
                 "id": new_id,
                 "name": request.form["projectName"],
@@ -31,12 +34,12 @@ def create_project():
             }
             app.mongo.db.users.update_one({"_id": user["_id"]}, {"$push": {"projects": project_object}})
             return redirect('/projects/' + str(new_id))
-        return render_template('createProject.html', name=user["name"])
+        return render_template('createProject.html', name=user["name"], error=None)
     return redirect(url_for('login', error="You must login first"))
 
 @app.route('/projects/<int:project_id>')
 def get_project(project_id):
-    user = getCurrentSessionUser()
+    user = getCurrentSessionUser(include_projects = 1)
     if user:
         if "projects" in user:
             selected = None
@@ -53,6 +56,15 @@ def autoIncrement(field):
     counter = app.mongo.db.counters.find_one({"_id": field})
     return counter["value"]
 
-# Ver que pedo, como guardar CSV
-def saveCSV():
-    pass
+# Change filename to something diferent for all users
+def saveCSV(username, projectId):
+    # Change 'csv' to actual name of field
+    if 'csv' not in request.files:
+        return False
+    file = request.files['csv']
+    filename_splited = file.filename.rsplit('.', 1)
+    if len(filename_splited) >= 2 and filename_splited[1].lower() == "csv":
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], username, "project-" + str(projectId))) # This if new directory is created for each user
+        # file.save(os.path.join(app.config['UPLOAD_FOLDER'], username + "-project-" + str(projectId))) # This if new directory is not created for each user
+        return True
+    return False
