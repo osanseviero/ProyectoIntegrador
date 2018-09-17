@@ -1,5 +1,5 @@
 import re
-from flask import render_template, request, redirect
+from flask import render_template, request, redirect, url_for
 from app import app
 from .sessions import *
 from passlib.hash import sha256_crypt
@@ -55,6 +55,3 @@ def page_not_found(e):
     if user:
         name = user["name"]
     return render_template('404.html', name=name), 404
-
-
-# Status 405 for methods not allowed

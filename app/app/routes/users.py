@@ -22,7 +22,7 @@ def register():
                         if password == request.form["repassword"]:
                             password = sha256_crypt.encrypt(password)
                             app.mongo.db.users.insert({"name": name, "password": password, "email": email, "username": username})
-                            os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], username))
+                            os.mkdir(os.path.join(app.config['UPLOAD_FOLDER'], username))
                             return redirect(url_for('login'))
                         else:
                             error = "Passwords don't match"
@@ -38,7 +38,7 @@ def register():
 
 @app.route('/users/profile')
 def profile():
-    user = getCurrentSessionUser(include_projects = 1)
+    user = getCurrentSessionUser()
     if user:
         error = None
         if "error" in request.args:
@@ -108,12 +108,9 @@ def delete_user():
     if user:
         removeSession()
         app.mongo.db.users.delete_one({"_id": user["_id"]})
-        curdir = os.getcwd()
-        os.chdir(os.path.join(app.config["UPLOAD_FOLDER"], user["username"]))
-        for csv in os.listdir():
-            os.remove(csv)
-        os.chdir("..")
-        os.rmdir(user["username"])
-        os.chdir(curdir)
+        path = os.path.join(app.config["UPLOAD_FOLDER"], user["username"])
+        for file in os.listdir(path):
+            os.remove(os.path.join(app.config["UPLOAD_FOLDER"], user["username"], file))
+        os.rmdir(path)
         return redirect('/')
     return redirect(url_for("login", error="You must login first"))
