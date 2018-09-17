@@ -64,8 +64,6 @@ def get_classifier_estimator(hparams, feature_columns, label_names, classes):
         return cfm.get_baseline_classifier(label_names, classes)
     elif hparams.model_type == 'NN':
         return cfm.get_dnn_classifier(feature_columns, label_names, classes)
-    elif hparams.model_type == 'BoostedTrees':
-        return cfm.get_boosted_tree_classifier(feature_columns, label_names, classes)
     elif hparams.model_type == 'Linear':
         return cfm.get_dnn_classifier(feature_columns, label_names, classes)
 
@@ -79,8 +77,6 @@ def get_regressor_estimator(hparams, feature_columns):
         return rgm.get_baseline_regressor()
     elif hparams.model_type == 'NN':
         return rgm.get_dnn_regressor(feature_columns)
-    elif hparams.model_type == 'BoostedTrees':
-        return rgm.get_boosted_tree_regressor(feature_columns)
     elif hparams.model_type == 'Linear':
         return rgm.get_linear_regressor(feature_columns)
 

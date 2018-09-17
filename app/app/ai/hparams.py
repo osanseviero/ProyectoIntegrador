@@ -12,7 +12,6 @@ class HParams():
       model_type: The type of TensorFlow estimator being used. Supports:
         - NN
         - baseline
-        - BoostedTrees
         - Linear
     """
     #TODO(osanseviero): Add optimizer as hyperparameter.

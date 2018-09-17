@@ -31,26 +31,6 @@ def get_dnn_classifier(feature_columns, label_names, classes):
         label_vocabulary=label_names)
     return classifier
 
-def get_boosted_tree_classifier(feature_columns, label_names, classes):
-    """Creates a Boosted Tree Classifier TensorFlow Estimator.
-    
-    It only has support for binary classification
-    Args:
-      feature_columns: A list of tf.feature_columns.
-      label_names: A list with the label names.
-      classes: The number of classes.
-    Returns: A tf.Estimator
-    """
-    #TODO(osanseviero): Remove exception once there is support by TensorFlow.
-    if classes != 2:
-        raise ValueError("Boosted Tree Classifier only supports binary classification")
-    classifier = tf.estimator.BoostedTreesClassifier(
-        feature_columns=feature_columns,
-        n_batches_per_layer=5,
-        n_classes=classes,
-        label_vocabulary=label_names)
-    return classifier
-
 def get_linear_classifier(feature_columns, label_names, classes):
     """Creates a Linear Classifier TensorFlow Estimator.
 
