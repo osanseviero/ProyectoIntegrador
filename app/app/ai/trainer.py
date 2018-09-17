@@ -5,12 +5,13 @@ based on them.
 """
 
 import tensorflow as tf
-import models
+from models import classifier_models as cfm
+from models import regressor_models as rgm
 from hparams import HParams
 from trainer_config import TrainerConfig
 
 # Data downloaded from https://archive.ics.uci.edu/ml/machine-learning-databases/iris/
-CSV_PATH = "data/iris.csv"
+CSV_PATH = "data/test/housing.csv"
 
 def construct_feature_columns(feature_names):
     """Creates feature columns to be given to a tf.Estimator.
@@ -60,19 +61,34 @@ def get_classifier_estimator(hparams, feature_columns, label_names, classes):
       classes: The number of possible classification classes.
     """
     if hparams.model_type == 'baseline':
-        return models.get_baseline_classifier(label_names, classes)
+        return cfm.get_baseline_classifier(label_names, classes)
     elif hparams.model_type == 'NN':
-        return models.get_dnn_classifier(feature_columns, label_names, classes)
+        return cfm.get_dnn_classifier(feature_columns, label_names, classes)
     elif hparams.model_type == 'BoostedTrees':
-        return models.get_boosted_tree_classifier(feature_columns, label_names, classes)
+        return cfm.get_boosted_tree_classifier(feature_columns, label_names, classes)
     elif hparams.model_type == 'Linear':
-        return models.get_dnn_classifier(feature_columns, label_names, classes)
+        return cfm.get_dnn_classifier(feature_columns, label_names, classes)
+
+def get_regressor_estimator(hparams, feature_columns):
+    """Creates a TF Estimator regressor based on the hyperparameters
+    Args:
+      hparams: A HParams object with the model hyperparameters.
+      feature_columns: TensorFlow feature columns.
+    """
+    if hparams.model_type == 'baseline':
+        return rgm.get_baseline_regressor()
+    elif hparams.model_type == 'NN':
+        return rgm.get_dnn_regressor(feature_columns)
+    elif hparams.model_type == 'BoostedTrees':
+        return rgm.get_boosted_tree_regressor(feature_columns)
+    elif hparams.model_type == 'Linear':
+        return rgm.get_linear_regressor(feature_columns)
 
 
-def run_tf_model(hparams):
+def run_tf_model(hparams, classification=True):
     """Implements and trains TensorFlow estimator and prints metrics.
     """
-    config = TrainerConfig(categorical=True, csv_path=CSV_PATH, label_idx=4)
+    config = TrainerConfig(classification=classification, csv_path=CSV_PATH, label_idx=13)
 
     # TODO(osanseviero): Implement support for categorical features.
     feature_columns = construct_feature_columns(config.feature_names)
@@ -81,6 +97,8 @@ def run_tf_model(hparams):
     if config.classification:
         estimator = get_classifier_estimator(hparams, feature_columns, config.label_names,
                                              config.classes)
+    else:
+        estimator = get_regressor_estimator(hparams, feature_columns)
 
 
     # Training and evaluation specs.
@@ -100,8 +118,8 @@ def run_tf_model(hparams):
     print(metrics)
 
 def main():
-    hparams = HParams(batch_size=1000, train_steps=100)
-    run_tf_model(hparams)
+    hparams = HParams(batch_size=1000, train_steps=100, model_type='Linear')
+    run_tf_model(hparams, classification=False)
 
 
 if __name__ == "__main__":

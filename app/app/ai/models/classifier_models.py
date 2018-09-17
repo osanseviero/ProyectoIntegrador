@@ -1,4 +1,4 @@
-"""TensorFlow models implementations.
+"""TensorFlow classifier models estimators.
 """
 
 import tensorflow as tf
@@ -41,7 +41,7 @@ def get_boosted_tree_classifier(feature_columns, label_names, classes):
       classes: The number of classes.
     Returns: A tf.Estimator
     """
-    #TODO(osanseviero): Remove exception once 
+    #TODO(osanseviero): Remove exception once there is support by TensorFlow.
     if classes != 2:
         raise ValueError("Boosted Tree Classifier only supports binary classification")
     classifier = tf.estimator.BoostedTreesClassifier(
@@ -53,8 +53,7 @@ def get_boosted_tree_classifier(feature_columns, label_names, classes):
 
 def get_linear_classifier(feature_columns, label_names, classes):
     """Creates a Linear Classifier TensorFlow Estimator.
-    
-    It only has support for binary classification
+
     Args:
       feature_columns: A list of tf.feature_columns.
       label_names: A list with the label names.

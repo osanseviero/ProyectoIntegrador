@@ -18,10 +18,10 @@ class HParams():
     #TODO(osanseviero): Add optimizer as hyperparameter.
     #TODO(osanseviero): Add support of conditional hparams.
     #TODO(osanseviero): Validate model type values.
-    def __init__(self, batch_size=None, train_steps=100):
+    def __init__(self, batch_size=None, train_steps=100, model_type='NN'):
         self.batch_size = batch_size
         self.train_steps = train_steps
-        self.model_type = 'Linear'
+        self.model_type = model_type
 
 #TODO(osanseviero): Implement HParam space class.
 #TODO(osanseviero): Implement HParam space config with trainer_config.

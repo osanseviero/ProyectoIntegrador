@@ -10,13 +10,12 @@ import numpy as np
 class TrainerConfig():
     """Creates feature columns to be given to a tf.Estimator.
     Args:
-      categorical: Boolean value. If false, it uses regression.
+      classification: Boolean value. If false, it uses regression.
       csv_path: Path for the csv file with the data for the ML problem.
       label_idx: Column index that contains the label to be predicted.
     """
-    def __init__(self, categorical, csv_path, label_idx):
+    def __init__(self, classification, csv_path, label_idx):
         data = pd.read_csv(csv_path)
-
         # Make 70/30 split.
         train_df, test_df = np.split(data.sample(frac=1), [int(.7*len(data))])
 
@@ -27,10 +26,12 @@ class TrainerConfig():
         self.test_y = test_df[test_df.columns[label_idx]]
 
         # TODO(osanseviero): Implement support for regression
-        if categorical:
+        if classification:
             self.label_names = list(self.train_y.unique())
             self.classes = len(self.label_names)
             self.classification = True
+        else:
+            self.classification = False
 
         # Obtain feature names.
         self.feature_names = list(self.train_x.columns.values)
