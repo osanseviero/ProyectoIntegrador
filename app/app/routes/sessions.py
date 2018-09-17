@@ -7,7 +7,10 @@ def getCurrentSessionUser(include_projects = 0):
     if "token" in session:
         current_session = app.mongo.db.sessions.find_one({"token": session["token"]})
         if current_session:
-            user = app.mongo.db.users.find_one({"_id": current_session["user_id"]}, {"password": 0, "projects": include_projects})
+            projection = {"password": 0}
+            if not include_projects:
+                projection["projects"] = 0
+            user = app.mongo.db.users.find_one({"_id": current_session["user_id"]}, projection)
             print(user)
     return user
 
