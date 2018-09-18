@@ -4,24 +4,30 @@ This functions reads CSV files and trains and evaluates a TensorFlow Estimator
 based on them.
 """
 
-import tensorflow as tf
 from models import classifier_models as cfm
 from models import regressor_models as rgm
 from hparams import HParams
 from trainer_config import TrainerConfig
+import tensorflow as tf
 
-# Data downloaded from https://archive.ics.uci.edu/ml/machine-learning-databases/iris/
-CSV_PATH = "data/test/housing.csv"
 
-def construct_feature_columns(feature_names):
+def construct_feature_columns(features):
     """Creates feature columns to be given to a tf.Estimator.
     Args:
-      feature_names: A list of strings with the names of the columns
+      features: A list of Features objects
     Returns: A list of tf.feature_columns.
     """
     feature_columns = []
-    for name in feature_names:
-        feature_columns.append(tf.feature_column.numeric_column(key=name))
+    for feature in features:
+        if feature.numeric:
+            feature_columns.append(tf.feature_column.numeric_column(
+                key=feature.name
+            ))
+        else:
+            feature_columns.append(tf.feature_column.categorical_column_with_vocabulary_list(
+                key=feature.name,
+                vocabulary_list=feature.vocabulary_list
+            ))
     return feature_columns
 
 
@@ -81,13 +87,13 @@ def get_regressor_estimator(hparams, feature_columns):
         return rgm.get_linear_regressor(feature_columns)
 
 
-def run_tf_model(hparams, classification=True):
+def run_tf_model(hparams, classification, csv_path, label, features):
     """Implements and trains TensorFlow estimator and prints metrics.
     """
-    config = TrainerConfig(classification=classification, csv_path=CSV_PATH, label_idx=13)
+    config = TrainerConfig(classification, csv_path, label, features)
 
     # TODO(osanseviero): Implement support for categorical features.
-    feature_columns = construct_feature_columns(config.feature_names)
+    feature_columns = construct_feature_columns(config.features)
 
     # Configure estimator.
     if config.classification:
@@ -109,14 +115,5 @@ def run_tf_model(hparams, classification=True):
                                                             1),
                                       steps=config.evaluation_steps)
 
-    # TODO(osanseviero): Implement ExportStrategy.
     metrics = tf.estimator.train_and_evaluate(estimator, train_spec, eval_spec)
-    print(metrics)
-
-def main():
-    hparams = HParams(batch_size=1000, train_steps=100, model_type='Linear')
-    run_tf_model(hparams, classification=False)
-
-
-if __name__ == "__main__":
-    main()
+    return metrics
