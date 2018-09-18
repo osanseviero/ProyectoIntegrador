@@ -8,7 +8,11 @@ app = Flask(__name__)
 app.secret_key = "b7Ux98ZEx95ix1bx8cS)xc6x8cx8excbP"
 
 # Set up mongo database
-mongo = PyMongo(app, uri="mongodb://localhost:27017/WebMLdb")
+app.mongo = PyMongo(app, uri="mongodb://localhost:27017/WebMLdb")
+
+# Set up file upload configuration
+app.config['UPLOAD_FOLDER'] = '/data/uploads/'
+# app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 # 16 megabytes, change this to max upload size allowed, if needed
 
 # Import routes
 from .routes import *

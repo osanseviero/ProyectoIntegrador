@@ -4,24 +4,32 @@ This functions reads CSV files and trains and evaluates a TensorFlow Estimator
 based on them.
 """
 
+from models import classifier_models as cfm
+from models import regressor_models as rgm
+from hparams import HParams
+from trainer_config import TrainerConfig
 import tensorflow as tf
-import pandas as pd
-import models
 
-# Data downloaded from https://archive.ics.uci.edu/ml/machine-learning-databases/iris/
-TRAIN_URL = "data/iris-training.csv"
-TEST_URL = "data/iris-testing.csv"
 
-def construct_feature_columns(feature_names):
+def construct_feature_columns(features):
     """Creates feature columns to be given to a tf.Estimator.
     Args:
-      feature_names: A list of strings with the names of the columns
+      features: A list of Features objects
     Returns: A list of tf.feature_columns.
     """
     feature_columns = []
-    for name in feature_names:
-        feature_columns.append(tf.feature_column.numeric_column(key=name))
+    for feature in features:
+        if feature.numeric:
+            feature_columns.append(tf.feature_column.numeric_column(
+                key=feature.name
+            ))
+        else:
+            feature_columns.append(tf.feature_column.categorical_column_with_vocabulary_list(
+                key=feature.name,
+                vocabulary_list=feature.vocabulary_list
+            ))
     return feature_columns
+
 
 def get_input_fn(features, labels, batch_size, shuffle=True):
     """Creates a TensorFlow Estimator input_fn.
@@ -49,44 +57,70 @@ def get_input_fn(features, labels, batch_size, shuffle=True):
         return dataset.make_one_shot_iterator().get_next()
     return input_fn
 
-def run_tf_model():
-    """Implements and trains TensorFlow estimator and prints metrics.
+
+def get_classifier_estimator(hparams, feature_columns, label_names, classes):
+    """Creates a TF Estimator classifier based on the hyperparameters
+    Args:
+      hparams: A HParams object with the model hyperparameters.
+      feature_columns: TensorFlow feature columns.
+      label_names: A list of strings with the label names.
+      classes: The number of possible classification classes.
     """
-    train_df = pd.read_csv(TRAIN_URL)
-    test_df = pd.read_csv(TEST_URL)
+    if hparams.model_type == 'baseline':
+        return cfm.get_baseline_classifier(label_names, classes)
+    elif hparams.model_type == 'NN':
+        return cfm.get_dnn_classifier(feature_columns, label_names, classes)
+    elif hparams.model_type == 'Linear':
+        return cfm.get_dnn_classifier(feature_columns, label_names, classes)
 
-    # Split into features and labels
-    train_x = train_df.drop([train_df.columns[4]], axis=1)
-    train_y = train_df[train_df.columns[4]]
-    test_x = test_df.drop(test_df.columns[4], axis=1)
-    test_y = test_df[test_df.columns[4]]
+def get_regressor_estimator(hparams, feature_columns):
+    """Creates a TF Estimator regressor based on the hyperparameters
+    Args:
+      hparams: A HParams object with the model hyperparameters.
+      feature_columns: TensorFlow feature columns.
+    """
+    if hparams.model_type == 'baseline':
+        return rgm.get_baseline_regressor()
+    elif hparams.model_type == 'NN':
+        return rgm.get_dnn_regressor(feature_columns)
+    elif hparams.model_type == 'Linear':
+        return rgm.get_linear_regressor(feature_columns)
 
-    # Get label names and feature columns
-    label_names = ['Iris-setosa', 'Iris-versicolor', 'Iris-virginica']
-    feature_names = ['sepal_length', 'sepal_width', 'petal_length', 'petal_width']
-    feature_columns = construct_feature_columns(feature_names)
 
-    # Configure estimator
-    estimator = models.get_dnn_classifier(feature_columns, label_names)
+def run_tf_model(hparams, classification, csv_path, label, features):
+    """Implements and trains TensorFlow estimator.
+    Args:
+        hparams: A HParams object with the model hyperparameters.
+        classification: True for classification, False for regression.
+        csv_path: String with the location of the CSV with the training data.
+        label: Name of the column with the label.
+        features: A list of Feature objects.
+    Returns: Metrics obtained from evaluation.
+    """
+    config = TrainerConfig(classification, csv_path, label, features)
 
-    # Training and evaluation specs
-    train_spec = tf.estimator.TrainSpec(input_fn=get_input_fn(train_x,
-                                                              train_y,
-                                                              100),
-                                        max_steps=100)
-    eval_spec = tf.estimator.EvalSpec(input_fn=get_input_fn(test_x,
-                                                            test_y,
-                                                            25,
-                                                            shuffle=False))
+    # TODO(osanseviero): Implement support for categorical features.
+    feature_columns = construct_feature_columns(config.features)
 
-    # TODO(osanseviero): Implement ExportStrategy
+    # Configure estimator.
+    if config.classification:
+        estimator = get_classifier_estimator(hparams, feature_columns, config.label_names,
+                                             config.classes)
+    else:
+        estimator = get_regressor_estimator(hparams, feature_columns)
+
+
+    # Training and evaluation specs.
+    train_spec = tf.estimator.TrainSpec(input_fn=get_input_fn(config.train_x,
+                                                              config.train_y,
+                                                              batch_size=hparams.batch_size,
+                                                              shuffle=False),
+                                        max_steps=hparams.train_steps)
+
+    eval_spec = tf.estimator.EvalSpec(input_fn=get_input_fn(config.test_x,
+                                                            config.test_y,
+                                                            1),
+                                      steps=config.evaluation_steps)
+
     metrics = tf.estimator.train_and_evaluate(estimator, train_spec, eval_spec)
-    print(metrics)
-
-def main():
-    """Main function"""
-    run_tf_model()
-
-
-if __name__ == "__main__":
-    main()
+    return metrics
