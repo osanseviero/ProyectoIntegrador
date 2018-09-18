@@ -60,9 +60,16 @@ class TrainerConfig():
         feature_list = []
         for feature in features:
             name = feature[0]
-            numeric = feature[1]
-            if numeric:
-                feature_list.append(Feature(name, numeric))
+            feature_type = feature[1]
+            if feature_type == 'numeric':
+                feature_list.append(Feature(name, True))
             else:
-                feature_list.append(Feature(name, numeric, self.train_x[[name]].unique()))
+                # Get column index
+                idx = self.train_x.columns.get_loc(name)
+
+                # Get column as Pandas Series
+                col = self.train_x[self.train_x.columns[idx]]
+
+                # Get all possible values
+                feature_list.append(Feature(name, False, list(col.unique())))
         return feature_list

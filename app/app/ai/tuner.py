@@ -83,6 +83,30 @@ def main():
                     features)
     tuner.get_baseline()
 
+    # Project 3 - serious classification
+    features = [['country_full', 'categorical'],
+                ['country_abrv', 'categorical'],
+                ['total_points', 'numeric'],
+                ['previous_points', 'numeric'],
+                ['rank_change', 'numeric'],
+                ['cur_year_avg', 'numeric'],
+                ['cur_year_avg_weighted', 'numeric'],
+                ['last_year_avg', 'numeric'],
+                ['last_year_avg_weighted', 'numeric'],
+                ['two_year_ago_avg', 'numeric'],
+                ['two_year_ago_weighted', 'numeric'],
+                ['three_year_ago_avg', 'numeric'],
+                ['two_year_ago_weighted', 'numeric'],
+                ['three_year_ago_weighted', 'numeric'],
+                ['confederation', 'categorical'],
+                ['rank_date', 'categorical']]
+    label = 'rank'
+    tuner = HPTuner(False,
+                    "data/test/fifa_ranking.csv",
+                    label,
+                    features)
+    tuner.get_baseline()
+
 
 if __name__ == "__main__":
     main()
