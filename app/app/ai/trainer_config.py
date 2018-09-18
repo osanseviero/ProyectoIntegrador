@@ -6,7 +6,6 @@ obtains the feature and label names to be used by TensorFlow Estimators.
 """
 import pandas as pd
 import numpy as np
-import tensorflow as tf
 
 class Feature:
     def __init__(self, name, numeric, vocabulary_list=None):
@@ -46,12 +45,18 @@ class TrainerConfig():
             self.classification = False
 
         # Obtain feature names.
-        self.features = self.createFeatures(features, self.train_x)
+        self.features = self.create_features(features)
 
         # Evaluate the whole testing set.
         self.evaluation_steps = len(self.train_y.index)
 
-    def createFeatures(self, features, data):
+    def create_features(self, features):
+        """Create a list of feature objects to be used by column constructor.
+        Args:
+          features: List of lists where the first element is the feature name and
+                the second element is numerical or categorical.
+        Returns: A list of Feature objects.
+        """
         feature_list = []
         for feature in features:
             name = feature[0]
@@ -59,5 +64,5 @@ class TrainerConfig():
             if numeric:
                 feature_list.append(Feature(name, numeric))
             else:
-                feature_list.append(Feature(name, numeric, data[[name]].unique()))
+                feature_list.append(Feature(name, numeric, self.train_x[[name]].unique()))
         return feature_list
