@@ -88,7 +88,14 @@ def get_regressor_estimator(hparams, feature_columns):
 
 
 def run_tf_model(hparams, classification, csv_path, label, features):
-    """Implements and trains TensorFlow estimator and prints metrics.
+    """Implements and trains TensorFlow estimator.
+    Args:
+        hparams: A HParams object with the model hyperparameters.
+        classification: True for classification, False for regression.
+        csv_path: String with the location of the CSV with the training data.
+        label: Name of the column with the label.
+        features: A list of Feature objects.
+    Returns: Metrics obtained from evaluation.
     """
     config = TrainerConfig(classification, csv_path, label, features)
 
