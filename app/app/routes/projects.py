@@ -2,6 +2,7 @@ import os, re
 from flask import render_template, request, redirect, url_for
 from app import app
 from .sessions import getCurrentSessionUser
+#from werkzeug.utils import secure_filename
 current_project = {"id":None}
 
 @app.route('/projects')
@@ -34,8 +35,9 @@ def create_project():
                     if result:
                         features = [feature.split(":") for feature in features.replace(" ","").split(",")]
                         new_id = autoIncrement(user["_id"], "projects")
-                        if saveCSV(user["username"], new_id):
-                            project_object = {"id": new_id, "name": project_name, "type": request.form["type"], "label": label, "features": features}
+                        filename = saveCSV(user["username"], new_id)
+                        if filename:
+                            project_object = {"id": new_id, "name": project_name, "type": request.form["type"], "filename": filename, "label": label, "features": features}
                             app.mongo.db.users.update_one({"_id": user["_id"]}, {"$push": {"projects": project_object}})
                             return redirect(url_for('get_project', project_id=new_id))
                         else:
@@ -56,15 +58,15 @@ def autoIncrement(id, collection):
     return counter["value"]
 
 def saveCSV(username, projectId):
-    print(request.files)
     if 'csv' not in request.files:
-        return False
+        return None
     file = request.files['csv']
     filename_splited = file.filename.rsplit('.', 1)
     if len(filename_splited) >= 2 and filename_splited[1].lower() == "csv":
+        filename = secure_filename(file.filename)
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], username, "project_" + str(projectId) + ".csv"))
-        return True
-    return False
+        return filename
+    return None
 
 @app.route('/projects/<int:project_id>')
 def get_project(project_id):
