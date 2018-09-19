@@ -1,5 +1,11 @@
 {% extends "base.html" %}
-{% block title %}Page not found{% endblock %}
+{% block title %}
+    {% if user["name"] %}
+        {{ user["name"]}}'s profile
+    {% else %}
+        Profile
+    {% endif %}
+{% endblock %}
 {% block header %} {% include "header.html" %} {% endblock %}
 {% block content %}
     <main role="main" class="container" style="min-height: calc(100vh - 160px)">
@@ -23,25 +29,25 @@
 
             <div id="edit_view">
                 <!-- Modify profile -->
-                <form action="" class="">
+                <form action="{{url_for('update_user_info' )}}" method="post">
                     <h3>Change profile information</h3>
                     <div class="form-group mb-1 ">
                         <label for="name" class="sr-only">Name</label>
-                        <input type="text" name="name" id="name" class="form-control" placeholder="Name" required>
+                        <input type="text" name="name" id="name" class="form-control" placeholder="Name" value="{{user['name']}}" required>
                     </div>
                     <div class="form-group mb-1 ">
                         <label for="username" class="sr-only">Username</label>
-                        <input type="text" name="username" id="username" class="form-control" placeholder="Username" required>
+                        <input type="text" name="username" id="username" class="form-control" placeholder="Username" value="{{user['username']}}" required>
                     </div>
                     <div class="form-group mb-1 ">
                         <label for="email" class="sr-only">Email</label>
-                        <input type="email" name="email" id="email" class="form-control" placeholder="Email" required>
+                        <input type="email" name="email" id="email" class="form-control" placeholder="Email" value="{{user['email']}}" required>
                     </div>            
                     <button class="btn btn-primary" type="submit">Change info</button>
                 </form>
                 <hr/>
                 <!-- Change password -->
-                <form action="" class="">
+                <form action="{{url_for('update_user_password')}}" method="post">
                     <h3>Change password</h3>
                     <div class="form-group mb-3">
                         <label for="oldPassword" class="sr-only">Current Password</label>
