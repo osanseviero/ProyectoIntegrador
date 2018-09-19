@@ -42,6 +42,17 @@ class HPTuner():
         print(result)
         return result
 
+    def get_linear(self):
+        hparams = HParams(batch_size=100, train_steps=1000, model_type='Linear')
+        metrics = run_tf_model(hparams, self.classification, self.path, self.label, self.features)
+
+        result = {}
+        result['metrics'] = metrics
+        result['hparams'] = hparams.__dict__
+
+        print(result)
+        return result
+
     #TODO(osanseviero): Implement HParam space config with trainer_config.
     def tune(self, space):
         pass
@@ -70,7 +81,7 @@ def main():
                     label,
                     features)
     tuner.get_baseline()
-
+    
     # Project 2 - classification
     features = [['sepal_length', 'numeric'],
                 ['sepal_width', 'numeric'],
@@ -96,7 +107,6 @@ def main():
                 ['two_year_ago_avg', 'numeric'],
                 ['two_year_ago_weighted', 'numeric'],
                 ['three_year_ago_avg', 'numeric'],
-                ['two_year_ago_weighted', 'numeric'],
                 ['three_year_ago_weighted', 'numeric'],
                 ['confederation', 'categorical'],
                 ['rank_date', 'categorical']]
@@ -106,7 +116,8 @@ def main():
                     label,
                     features)
     tuner.get_baseline()
-
+    tuner.get_linear()
+    
 
 if __name__ == "__main__":
     main()
