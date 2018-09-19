@@ -106,11 +106,10 @@ def update_user_password():
 def delete_user():
     user = getCurrentSessionUser()
     if user:
-        removeSession()
         app.mongo.db.users.delete_one({"_id": user["_id"]})
         path = os.path.join(app.config["UPLOAD_FOLDER"], user["username"])
         for file in os.listdir(path):
             os.remove(os.path.join(app.config["UPLOAD_FOLDER"], user["username"], file))
         os.rmdir(path)
-        return redirect('/')
+        return redirect(url_for("logout"))
     return redirect(url_for("login", error="You must login first"))

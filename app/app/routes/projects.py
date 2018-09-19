@@ -56,12 +56,13 @@ def autoIncrement(id, collection):
     return counter["value"]
 
 def saveCSV(username, projectId):
+    print(request.files)
     if 'csv' not in request.files:
         return False
     file = request.files['csv']
     filename_splited = file.filename.rsplit('.', 1)
     if len(filename_splited) >= 2 and filename_splited[1].lower() == "csv":
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], username, "project-" + str(projectId) + ".csv"))
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], username, "project_" + str(projectId) + ".csv"))
         return True
     return False
 
@@ -107,7 +108,7 @@ def delete_project():
     if user:
         project_id = current_project["id"]
         app.mongo.db.users.update_one({"_id": user["_id"]}, {"$pull": {"projects": {"id": project_id}}})
-        os.remove(os.path.join(app.config["UPLOAD_FOLDER"], user["username"], "project-" + str(project_id) + ".csv"))
+        os.remove(os.path.join(app.config["UPLOAD_FOLDER"], user["username"], "project_" + str(project_id) + ".csv"))
         return redirect(url_for('get_projects'))
     return redirect(url_for('login', error="You must login first"))
 
