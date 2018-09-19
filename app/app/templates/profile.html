@@ -18,8 +18,8 @@
             <h1>Welcome <span class="text-capitalize">{{ user["name"] }}</span>
                 <button id="change_view" class="btn btn-default">Edit profile</button>
             </h1>
-            
-            
+
+
             <div id="display_view">
                 <!-- User info -->
                 <p><strong>Name:</strong> {{user["name"]}}</p>
@@ -42,7 +42,7 @@
                     <div class="form-group mb-1 ">
                         <label for="email" class="sr-only">Email</label>
                         <input type="email" name="email" id="email" class="form-control" placeholder="Email" value="{{user['email']}}" required>
-                    </div>            
+                    </div>
                     <button class="btn btn-primary" type="submit">Change info</button>
                 </form>
                 <hr/>
@@ -51,7 +51,7 @@
                     <h3>Change password</h3>
                     <div class="form-group mb-3">
                         <label for="oldPassword" class="sr-only">Current Password</label>
-                        <input type="password" name="password" id="oldPassword" class="form-control" placeholder="Password" required>
+                        <input type="password" name="current_password" id="oldPassword" class="form-control" placeholder="Password" required>
                     </div>
                     <div class="form-group">
                         <!-- TODO: notify of legal chars -->
@@ -59,7 +59,7 @@
                         <input type="password" name="password" id="inputPassword" class="form-control" placeholder="New Password" required>
                         <label for="inputPasswordConfirm" class="sr-only">Confirm Password</label>
                         <input type="password" name="repassword" id="inputPasswordConfirm" class="form-control" placeholder="Confirm Password" required>
-                    </div>          
+                    </div>
                     <button class="btn btn-danger" type="submit">Change password</button>
                 </form>
             </div>
@@ -72,7 +72,7 @@
     var edit = $("#edit_view");
     var display = $("#display_view");
     var button = $("#change_view");
-    
+
     edit.hide();
     var state = 0;
 

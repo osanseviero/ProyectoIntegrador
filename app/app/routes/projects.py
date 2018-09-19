@@ -24,22 +24,34 @@ def create_project():
         error = None
         if request.method == "POST":
             project_name = request.form["project_name"]
-            result = re.fullmatch('[A-Za-z0-9]+', project_name)
+            result = re.fullmatch('[A-Za-z0-9_ ]+', project_name)
             if result:
-                new_id = autoIncrement(user["_id"], "projects")
-                if saveCSV(user["username"], new_id):
-                    project_object = {"id": new_id, "name": project_name, "type": request.form["type"]}
-                    app.mongo.db.users.update_one({"_id": user["_id"]}, {"$push": {"projects": project_object}})
-                    return redirect(url_for('get_project', project_id=new_id))
-                app.mongo.db.counters.update_one({"user_id": user["_id"], "collection": "projects"}, {"$inc": {"value": -1}})
-                error = "Server error storing csv, try again later please"
+                label = request.form["label"]
+                result = re.fullmatch('[A-Za-z0-9_]+', label)
+                if result:
+                    features = request.form["features"]
+                    result = re.fullmatch('[A-Za-z0-9_:, ]+', features)
+                    if result:
+                        features = [feature.split(":") for feature in features.replace(" ","").split(",")]
+                        new_id = autoIncrement(user["_id"], "projects")
+                        if saveCSV(user["username"], new_id):
+                            project_object = {"id": new_id, "name": project_name, "type": request.form["type"], "label": label, "features": features}
+                            app.mongo.db.users.update_one({"_id": user["_id"]}, {"$push": {"projects": project_object}})
+                            return redirect(url_for('get_project', project_id=new_id))
+                        else:
+                            app.mongo.db.counters.update_one({"user_id": user["_id"], "collection": "projects"}, {"$inc": {"value": -1}})
+                            error = "Server error storing csv, try again later please"
+                    else:
+                        error = "Invalid characters in features field"
+                else:
+                    error = "Invalid characters in label field"
             else:
                 error = "Invalid characters in project name"
         return render_template('create_project.html', name=user["name"], error=error)
     return redirect(url_for('login', error="You must login first"))
 
 def autoIncrement(id, collection):
-    app.mongo.db.counters.update_one({"user_id": id, "collection": collection}, {"$inc" : {"value": 1}}, {"upsert": True})
+    app.mongo.db.counters.update_one({"user_id": id, "collection": collection}, {"$inc" : {"value": 1}}, upsert=True)
     counter = app.mongo.db.counters.find_one({"user_id": id, "collection": collection})
     return counter["value"]
 

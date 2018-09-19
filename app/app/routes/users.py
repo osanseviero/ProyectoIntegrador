@@ -71,7 +71,7 @@ def update_user_info():
             else:
                 error = "Invalid characters in username"
         if not error:
-            app.mongo.db.users.update_one({"_id": user["_id"]}, {"$set": updates)}
+            app.mongo.db.users.update_one({"_id": user["_id"]}, {"$set": updates})
         return redirect(url_for("profile", error=error))
     return redirect(url_for("login", error="You must login first"))
 
