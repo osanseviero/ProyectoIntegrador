@@ -9,24 +9,23 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarToggler">
             <div class="navbar-nav mr-auto">
-                <a href="/" class="nav-item nav-link mr-auto">Home</a>
                 {% if name or user %}
-                <a href="/projects" class="nav-item nav-link mr-auto">Projects</a>
+                <a href="/projects" class="nav-item nav-link mr-auto"><i class="fas fa-table"></i> Projects</a>
                 {% endif %}
             </div>
             {% if name or user %}
             <div class="navbar-nav">
-                <a href="/users/profile" class="nav-item nav-link text-capitalize">{{name or user["name"]}}'s Profile</a>
+                <a href="/users/profile" class="nav-item nav-link text-capitalize"><i class="fas fa-user-circle"></i> {{name or user["name"]}}'s Profile</a>
             </div>
             <div class="navbar-nav">
-                <a href="/logout" class="nav-item nav-link">Logout</a>
+                <a href="/logout" class="nav-item nav-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
             </div>
             {% else %}
             <div class="navbar-nav">
-                <a href="/register" class="nav-item nav-link">Register</a>
+                <a href="/register" class="nav-item nav-link"><i class="fas fa-user-plus"></i> Register</a>
             </div>
             <div class="navbar-nav">
-                <a href="/login" class="nav-item nav-link">Login</a>
+                <a href="/login" class="nav-item nav-link"><i class="fas fa-sign-in-alt"></i> Login</a>
             </div>
             {% endif %}
         </div>
