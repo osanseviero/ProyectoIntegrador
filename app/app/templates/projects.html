@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}My Projects{% endblock %}
+{% block header %} {% include "header.html" %} {% endblock %}
+{% block content %}
+    <main role="main" class="container" style="min-height: calc(100vh - 160px)">
+        <h1>My projects</h1>
+        <a href="/projects/create" class="btn btn-primary"><span class="glyphicon glyphicon-plus"></span>Create new</a href="#">
+
+    </main>
+{% endblock %}
