@@ -71,7 +71,7 @@ def update_user_info():
             else:
                 error = "Invalid characters in username"
         if not error:
-            app.mongo.db.users.update_one({"_id": user["_id"]}, updates)
+            app.mongo.db.users.update_one({"_id": user["_id"]}, {"$set": updates)}
         return redirect(url_for("profile", error=error))
     return redirect(url_for("login", error="You must login first"))
 
@@ -98,7 +98,7 @@ def update_user_password():
             error = "Invalid characters in current password"
         if not error:
             password = sha256_crypt.encrypt(password)
-            app.mongo.db.users.update_one({"_id": user["_id"]}, {"password": password})
+            app.mongo.db.users.update_one({"_id": user["_id"]}, {"$set": {"password": password}})
         return redirect(url_for("profile", error=error))
     return redirect(url_for("login", error="You must login first"))
 
