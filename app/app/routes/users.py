@@ -46,7 +46,7 @@ def profile():
         return render_template('profile.html', user=user, error=error)
     return redirect(url_for('login', error="You must login first"))
 
-@app.route('/users/update/info', methods=["PUT"])
+@app.route('/users/update/info', methods=["POST"])
 def update_user_info():
     user = getCurrentSessionUser()
     if user:
@@ -75,7 +75,7 @@ def update_user_info():
         return redirect(url_for("profile", error=error))
     return redirect(url_for("login", error="You must login first"))
 
-@app.route('/users/update/password', methods=["PUT"])
+@app.route('/users/update/password', methods=["POST"])
 def update_user_password():
     user = getCurrentSessionUser()
     if user:
@@ -87,8 +87,8 @@ def update_user_password():
             result = re.fullmatch('[A-Za-z0-9\*_\-\.\!\?]+', password)
             if result:
                 if password == request.form["repassword"]:
-                    hash = app.mongo.db.users.find_one({"_id": user["_id"]}, {"password" : 1})["password"]
-                    if not sha256_crypt.verify(current_password, hash):
+                    user = app.mongo.db.users.find_one({"_id": user["_id"]}, {"password" : 1})
+                    if not sha256_crypt.verify(current_password, user["password"]):
                         error = "Incorrect password"
                 else:
                     error = "Passwords don't match"
@@ -102,7 +102,7 @@ def update_user_password():
         return redirect(url_for("profile", error=error))
     return redirect(url_for("login", error="You must login first"))
 
-@app.route('/users/delete', methods=["DELETE"])
+@app.route('/users/delete', methods=["POST"])
 def delete_user():
     user = getCurrentSessionUser()
     if user:
