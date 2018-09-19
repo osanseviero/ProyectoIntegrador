@@ -1,6 +1,6 @@
 # CSV Spec
 
-All of the data fed to the ML models is obtained from csv files given by users. Because there is no formal spec of a csv file, and there are different csv structures in different datasets, we are proposing a required format that users have to comply to. 
+All of the data fed to the ML models is obtained from csv files given by users. Because there is no formal spec of a csv file, and there are different csv structures in different datasets, we are proposing a required format that users have to comply to.
 
 Here is a simple example:
 
@@ -17,10 +17,13 @@ AGE, COUNTRY
 
 The spec is:
 
- - All values in the row are separated by a comma. 
+ - All values in the row are separated by a comma.
  - Rows don't end with a comma.
- - The first row of the csv file contains the name of the columns. These names can also be a number, but strings are strongly suggested.
+ - The first row of the csv file contains the name of the columns. These names have to be strings.
  - The values should never have quotes.
+ - Feature names and label can contain the following characters: Letters (uppercase and lowercase) and underscore
+ - Feature names (while creating project) must be followed by a colon and then the feature data type
+ - Feature names (while creating project) must be separated by commas
 
 ## Example
 **sepal_length,sepal_width,petal_length,petal_width,species**
