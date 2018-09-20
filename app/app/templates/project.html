@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% block title %}{{project['name']}}{% endblock %}
+{% block header %} {% include "header.html" %} {% endblock %}
+{% block content %}
+    <main role="main" class="container" style="min-height: calc(100vh - 160px)">
+        <h1>Project: <small>{{project['name']}}</small>
+            <button id="change_view" class="btn btn-secondary"><i class="fas fa-edit"></i> Edit project</button>
+        </h1>
+        {% if error %}
+        <div class="alert alert-danger mt-3 mb-0">
+            <strong>{{ error }}</strong>
+        </div>
+        {% endif %}
+
+        <div id="display_view">
+            <div class="row">
+                <div class="col-sm-2">
+                    <strong>Project ID</strong>
+                </div>
+                <div class="col-sm-10">{{project['id']}}</div>
+            </div>
+            <div class="row">
+                <div class="col-sm-2">
+                    <strong>Machine learning type</strong>
+                </div>
+                <div class="col-sm-10">{{project['type']}}</div>
+            </div>
+            <div class="row">
+                <div class="col-sm-2">
+                    <strong>Features</strong>
+                </div>
+                <div class="col-sm-10">
+                    {% for feature in project['features'] %}
+                        <p class="pb-0 mb-0"><strong>Name:</strong> {{feature[0]}}</p>
+                        <p><strong>Data type:</strong> {{feature[1]}}</p>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-2">
+                    <strong>Label</strong>
+                </div>
+                <div class="col-sm-10">{{project['label']}}</div>
+            </div>
+            <hr/>
+            <div class="text-right">
+                <button type="button" class="btn btn-danger mb-2" data-toggle="modal" data-target="#deleteUserModal"><i class="fas fa-times-circle"></i> Delete project</button>
+            </div>
+        </div>
+
+        <div id="edit_view">
+            <form action="{{url_for('update_project')}}" method="post">
+                <div class="form-group row">
+                    <label for="projectName" class="col-sm-2 col-form-label">Project Name</label>
+                    <div class="col-sm-10">
+                        <input type="text" name="project_name" id="projectName" class="form-control" placeholder="Project name" value="{{project['name']}}" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="row">
+                        <legend class="col-sm-2 col-form-label">Machine learning type</legend>
+                        <div class="col-sm-10 pt-2">
+                            <div class="form-check form-check-inline">
+                                <input type="radio" name="type" class="form-check-input" id="inputClassification" value="classification" checked>
+                                <label for="classification" class="form-check-label">Classification</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input type="radio" name="type" class="form-check-input" id="inputRegression" value="regression">
+                                <label for="regression" class="form-check-label">Regression</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="inputFeatures" class="col-sm-2 col-form-label">Features <small>(column_name:type,...)</small></label>
+                    <div class="col-sm-10 pt-1">
+                        <input type="text" name="features" class="form-control" id="inputFeatures" value="{{features_string}}" required>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="inputLabels" class="col-sm-2 col-form-label">Labels <small>(column_name)</small></label>
+                    <div class="col-sm-10 pt-1">
+                        <input type="text" name="label" class="form-control" id="inputLabels" value="{{project['label']}}" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Update project</button>
+            </form>
+        </div>
+
+        <div class="modal fade" id="deleteUserModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="modalLabel">
+                            Delete this project
+                        </h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Think about this carefully. <strong>This cannot be undone!</strong></p>
+                    </div>
+                    <div class="modal-footer">
+                        <form action="{{url_for('delete_project')}}" method="post">
+                            <button type="submit" class="btn btn-danger">Delete</button>
+                        </form>
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+{% endblock %}
+{% block script %}
+<script>
+    var edit = $("#edit_view");
+    var display = $("#display_view");
+    var button = $("#change_view");
+
+    edit.hide();
+    var state = 0;
+
+    button.click(function() {
+        if (state == 0) {
+            // Change to edit
+            state = 1;
+            edit.show();
+            display.hide();
+            button.html("<i class='fas fa-times'></i> Cancel");
+        } else {
+            // Change to display
+            state = 0;
+            edit.hide();
+            display.show();
+            button.html("<i class='fas fa-edit'></i> Edit profile");
+        }
+    });
+</script>
+{% endblock %}

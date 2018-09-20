@@ -46,7 +46,7 @@ def profile():
         return render_template('profile.html', user=user, error=error)
     return redirect(url_for('login', error="You must login first"))
 
-@app.route('/users/update/info', methods=["PUT"])
+@app.route('/users/update/info', methods=["POST"])
 def update_user_info():
     user = getCurrentSessionUser()
     if user:
@@ -71,11 +71,11 @@ def update_user_info():
             else:
                 error = "Invalid characters in username"
         if not error:
-            app.mongo.db.users.update_one({"_id": user["_id"]}, updates)
+            app.mongo.db.users.update_one({"_id": user["_id"]}, {"$set": updates})
         return redirect(url_for("profile", error=error))
     return redirect(url_for("login", error="You must login first"))
 
-@app.route('/users/update/password', methods=["PUT"])
+@app.route('/users/update/password', methods=["POST"])
 def update_user_password():
     user = getCurrentSessionUser()
     if user:
@@ -87,8 +87,8 @@ def update_user_password():
             result = re.fullmatch('[A-Za-z0-9\*_\-\.\!\?]+', password)
             if result:
                 if password == request.form["repassword"]:
-                    hash = app.mongo.db.users.find_one({"_id": user["_id"]}, {"password" : 1})["password"]
-                    if not sha256_crypt.verify(current_password, hash):
+                    user = app.mongo.db.users.find_one({"_id": user["_id"]}, {"password" : 1})
+                    if not sha256_crypt.verify(current_password, user["password"]):
                         error = "Incorrect password"
                 else:
                     error = "Passwords don't match"
@@ -98,19 +98,18 @@ def update_user_password():
             error = "Invalid characters in current password"
         if not error:
             password = sha256_crypt.encrypt(password)
-            app.mongo.db.users.update_one({"_id": user["_id"]}, {"password": password})
+            app.mongo.db.users.update_one({"_id": user["_id"]}, {"$set": {"password": password}})
         return redirect(url_for("profile", error=error))
     return redirect(url_for("login", error="You must login first"))
 
-@app.route('/users/delete', methods=["DELETE"])
+@app.route('/users/delete', methods=["POST"])
 def delete_user():
     user = getCurrentSessionUser()
     if user:
-        removeSession()
         app.mongo.db.users.delete_one({"_id": user["_id"]})
         path = os.path.join(app.config["UPLOAD_FOLDER"], user["username"])
         for file in os.listdir(path):
             os.remove(os.path.join(app.config["UPLOAD_FOLDER"], user["username"], file))
         os.rmdir(path)
-        return redirect('/')
+        return redirect(url_for("logout"))
     return redirect(url_for("login", error="You must login first"))

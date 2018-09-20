@@ -1,0 +1,31 @@
+#!/bin/bash
+if ! [[ -d /data ]]; then
+  echo "Making directory /data"
+  sudo mkdir /data
+fi
+if ! [[ -d /data/db ]]; then
+  echo "Making directory /data/db"
+  sudo mkdir /data/db
+  sudo chown -R $USER /data/db
+fi
+if ! [[ -d /data/uploads ]]; then
+  echo "Making directory /data/uploads"
+  sudo mkdir /data/uploads
+  sudo chown -R $USER /data/uploads
+fi
+if ! [[ -x $(command -v mongod) ]]; then
+  echo "Mongo server not istalled"
+  exit
+fi
+exists=$(python3.6 -c "import pkgutil; print(1 if pkgutil.find_loader('flask_pymongo') else 0)")
+if [[ $exists -eq 0 ]]; then
+  echo "Flask-PyMongo not installed";
+  exit
+  # pip install Flask-PyMongo
+fi
+exists=$(python3.6 -c "import pkgutil; print(1 if pkgutil.find_loader('passlib') else 0)")
+if [[ $exists -eq 0 ]]; then
+  echo "Passlib not installed";
+  exit
+  # pip install passlib
+fi
