@@ -2,7 +2,7 @@ import os, re
 from flask import render_template, request, redirect, url_for
 from app import app
 from .sessions import getCurrentSessionUser
-#from werkzeug.utils import secure_filename
+from werkzeug.utils import secure_filename
 current_project = {"id":None}
 
 @app.route('/projects')
@@ -55,7 +55,7 @@ def create_project():
 def autoIncrement(id, collection):
     app.mongo.db.counters.update_one({"user_id": id, "collection": collection}, {"$inc" : {"value": 1}}, upsert=True)
     counter = app.mongo.db.counters.find_one({"user_id": id, "collection": collection})
-    return counter["value"]
+    return int(counter["value"])
 
 def saveCSV(username, projectId):
     if 'csv' not in request.files:
@@ -83,7 +83,8 @@ def get_project(project_id):
                 if "error" in request.args:
                     error = request.args.get("error")
                 current_project["id"] = selected["id"]
-                return render_template('project.html', name=user["name"], project=selected, error=error)
+                features_string = ",".join([":".join(sublist) for sublist in selected["features"]])
+                return render_template('project.html', name=user["name"], project=selected, features_string=features_string, error=error)
             return redirect(url_for('get_projects', error="There's no project with id = " + str(project_id)))
         return redirect(url_for('get_projects', error="You have no projects created"))
     return redirect(url_for('login', error="You must login first"))
@@ -96,9 +97,20 @@ def update_project():
         error = None
         type = request.form["type"]
         project_name = request.form["project_name"]
-        result = re.fullmatch('[A-Za-z0-9]+', project_name)
+        result = re.fullmatch('[A-Za-z0-9_ ]+', project_name)
         if result:
-            app.mongo.db.users.update_one({"_id": user["_id"], "projects.id": project_id}, {"$set": {"projects.$.name": project_name, "projects.$.type": type}})
+            label = request.form["label"]
+            result = re.fullmatch('[A-Za-z0-9_]+', label)
+            if result:
+                features = request.form["features"]
+                result = re.fullmatch('[A-Za-z0-9_:, ]+', features)
+                if result:
+                    features = [feature.split(":") for feature in features.replace(" ","").split(",")]
+                    app.mongo.db.users.update_one({"_id": user["_id"], "projects.id": project_id}, {"$set": {"projects.$.name": project_name, "projects.$.type": type, "projects.$.label": label, "projects.$.features": features}})
+                else:
+                    error = "Invalid characters in features"
+            else:
+                error = "Invalid characters in label"
         else:
             error = "Invalid characters in project name"
         return redirect(url_for("get_project", project_id=project_id, error=error))
