@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}{{project['name']}}{% endblock %}
+{% block header %} {% include "header.html" %} {% endblock %}
+{% block content %}
+    <main role="main" class="container" style="min-height: calc(100vh - 160px)">
+        <h1>Project: <small>{{project['name']}}</small>
+            <button id="change_view" class="btn btn-secondary"><i class="fas fa-edit"></i> Edit project</button>
+        </h1>
+        {% if error %}
+        <div class="alert alert-danger mt-3 mb-0">
+            <strong>{{ error }}</strong>
+        </div>
+        {% endif %}
+
+        <div id="display_view">
+            <div class="row">
+                <div class="col-sm-2">
+                    <strong>Project ID</strong>
+                </div>
+                <div class="col-sm-10">{{project['id']}}</div>
+            </div>
+            <div class="row">
+                <div class="col-sm-2">
+                    <strong>Machine learning type</strong>
+                </div>
+                <div class="col-sm-10">{{project['type']}}</div>
+            </div>
+            <div class="row">
+                <div class="col-sm-2">
+                    <strong>Features</strong>
+                </div>
+                <div class="col-sm-10">{{project['features']}}</div>
+            </div>
+            <div class="row">
+                <div class="col-sm-2">
+                    <strong>Label</strong>
+                </div>
+                <div class="col-sm-10">{{project['label']}}</div>
+            </div>
+            <hr/>
+            <div class="text-right">
+                <button type="button" class="btn btn-danger mb-2" data-toggle="modal" data-target="#deleteUserModal"><i class="fas fa-times-circle"></i> Delete project</button>
+            </div>
+        </div>
+
+        <div id="edit_view">
+
+        </div>
+
+        <div class="modal fade" id="deleteUserModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="modalLabel">
+                            Delete this project
+                        </h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Think about this carefully. <strong>This cannot be undone!</strong></p>
+                    </div>
+                    <div class="modal-footer">
+                        <form action="{{url_for('delete_project')}}" method="post">
+                            <button type="submit" class="btn btn-danger">Delete</button>
+                        </form>
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+{% endblock %}
+{% block script %}
+<script>
+    var edit = $("#edit_view");
+    var display = $("#display_view");
+    var button = $("#change_view");
+
+    edit.hide();
+    var state = 0;
+
+    button.click(function() {
+        if (state == 0) {
+            // Change to edit
+            state = 1;
+            edit.show();
+            display.hide();
+            button.html("<i class='fas fa-times'></i> Cancel");
+        } else {
+            // Change to display
+            state = 0;
+            edit.hide();
+            display.show();
+            button.html("<i class='fas fa-edit'></i> Edit profile");
+        }
+    });
+</script>
+{% endblock %}
