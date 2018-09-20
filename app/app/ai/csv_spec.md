@@ -22,8 +22,6 @@ The spec is:
  - The first row of the csv file contains the name of the columns. These names have to be strings.
  - The values should never have quotes.
  - Feature names and label can contain the following characters: Letters (uppercase and lowercase) and underscore
- - Feature names (while creating project) must be followed by a colon and then the feature data type
- - Feature names (while creating project) must be separated by commas
 
 ## Example
 **sepal_length,sepal_width,petal_length,petal_width,species**
