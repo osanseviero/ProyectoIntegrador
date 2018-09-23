@@ -4,9 +4,11 @@ The HPTuner tunes the model HParams given a classification or regression
 problem. The tuner reports the metrics and the hyperparameters used to obtain
 those metrics.
 """
-
+import math
+import random
 from hparams import HParams
 from trainer import run_tf_model
+
 
 class HPTuner():
     """Creates HyperParameters tuner.
@@ -16,13 +18,28 @@ class HPTuner():
       label: Name of the label column.
       features: List of lists where the first element is the feature name and
                 the second element is numerical or categorical.
+      space: Dictionary that maps hyperparameter to possible values.
+      metric: Metric to optimize.
+      maximize: True to maximize and False to minimize.
 
     """
-    def __init__(self, classification, csv_path, label, features):
+    def __init__(self, classification, csv_path, label, features, space, metric, maximize):
         self.classification = classification
         self.path = csv_path
         self.label = label
         self.features = features
+        self.space = space
+        self.metric = metric
+        self.maximize = maximize
+
+        # Keep track of current trial, best trial and best reported metric
+        self.trial_id = 0
+        self.best_trial = 0
+
+        if self.maximize:
+            self.best_reported_metric = 0
+        else:
+            self.best_reported_metric = int(math.inf)
 
     def get_baseline(self):
         """Runs a baseline model for the data.
@@ -38,86 +55,45 @@ class HPTuner():
         result = {}
         result['metrics'] = metrics
         result['hparams'] = hparams.__dict__
+        result['trial'] = self.trial_id
 
-        print(result)
+        self.trial_id = self.trial_id + 1
         return result
 
-    def get_linear(self):
-        hparams = HParams(batch_size=100, train_steps=1000, model_type='Linear')
-        metrics = run_tf_model(hparams, self.classification, self.path, self.label, self.features)
+    #TODO(osanseviero): Implement GridSearch
+    def generate_trial(self):
+        """Creates a random trial and reports the results
+        When called, a new trial is generated. For the first trial, a baseline
+        model is used.
 
+        Returns: A dictionary with the metrics and the hyperparameters of the trial.
+        """
+        # Try baseline classifier for first trial
+        if self.trial_id == 0:
+            return self.get_baseline()
+
+        # Get random hparams
+        random_hparams = {}
+        for hparam in self.space:
+            random_hparams[hparam] = random.choice(self.space[hparam])
+
+        hparams = HParams(**random_hparams)
+        metrics = run_tf_model(hparams, self.classification, self.path, self.label, self.features)
         result = {}
         result['metrics'] = metrics
         result['hparams'] = hparams.__dict__
+        result['trial'] = self.trial_id
 
-        print(result)
+        #TODO(osanseviero): Delete this once it's handled in Flask
+        metric = metrics[0][self.metric]
+        if self.maximize:
+            if metric > self.best_reported_metric:
+                self.best_reported_metric = metric
+                self.best_trial = self.trial_id
+        else:
+            if metric < self.best_reported_metric:
+                self.best_reported_metric = metric
+                self.best_trial = self.trial_id
+
+        self.trial_id = self.trial_id + 1
         return result
-
-    #TODO(osanseviero): Implement HParam space config with trainer_config.
-    def tune(self, space):
-        pass
-
-#TODO(osanseviero): Implement HParam tuning with Grid and Random search.
-
-def main():
-    # Project 1 - regression
-    features = [['CRIM', 'numeric'],
-                ['ZN', 'numeric'],
-                ['INDUS', 'numeric'],
-                ['CHAS', 'numeric'],
-                ['NOX', 'numeric'],
-                ['RM', 'numeric'],
-                ['AGE', 'numeric'],
-                ['DIS', 'numeric'],
-                ['RAD', 'numeric'],
-                ['TAX', 'numeric'],
-                ['PT', 'numeric'],
-                ['B', 'numeric'],
-                ['LSTAT', 'numeric']]
-    label = 'MV'
-
-    tuner = HPTuner(False,
-                    "data/test/housing.csv",
-                    label,
-                    features)
-    tuner.get_baseline()
-    
-    # Project 2 - classification
-    features = [['sepal_length', 'numeric'],
-                ['sepal_width', 'numeric'],
-                ['petal_length', 'numeric'],
-                ['petal_width', 'numeric']]
-    label = 'species'
-    tuner = HPTuner(True,
-                    "data/test/iris.csv",
-                    label,
-                    features)
-    tuner.get_baseline()
-
-    # Project 3 - serious classification
-    features = [['country_full', 'categorical'],
-                ['country_abrv', 'categorical'],
-                ['total_points', 'numeric'],
-                ['previous_points', 'numeric'],
-                ['rank_change', 'numeric'],
-                ['cur_year_avg', 'numeric'],
-                ['cur_year_avg_weighted', 'numeric'],
-                ['last_year_avg', 'numeric'],
-                ['last_year_avg_weighted', 'numeric'],
-                ['two_year_ago_avg', 'numeric'],
-                ['two_year_ago_weighted', 'numeric'],
-                ['three_year_ago_avg', 'numeric'],
-                ['three_year_ago_weighted', 'numeric'],
-                ['confederation', 'categorical'],
-                ['rank_date', 'categorical']]
-    label = 'rank'
-    tuner = HPTuner(False,
-                    "data/test/fifa_ranking.csv",
-                    label,
-                    features)
-    tuner.get_baseline()
-    tuner.get_linear()
-    
-
-if __name__ == "__main__":
-    main()
