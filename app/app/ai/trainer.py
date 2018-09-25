@@ -24,9 +24,11 @@ def construct_feature_columns(features):
                 key=feature.name
             ))
         else:
-            feature_columns.append(tf.feature_column.categorical_column_with_vocabulary_list(
-                key=feature.name,
-                vocabulary_list=feature.vocabulary_list
+            feature_columns.append(tf.feature_column.indicator_column(
+                tf.feature_column.categorical_column_with_vocabulary_list(
+                    key=feature.name,
+                    vocabulary_list=feature.vocabulary_list
+                )
             ))
     return feature_columns
 
@@ -100,8 +102,6 @@ def run_tf_model(output_path, hparams, classification, csv_path, label, features
         features: A list of Feature objects.
     Returns: Metrics obtained from evaluation.
     """
-    print('Storing results from ' + hparams + ' to ' + output_path)
-
     config = TrainerConfig(classification, csv_path, label, features)
     feature_columns = construct_feature_columns(config.features)
 
