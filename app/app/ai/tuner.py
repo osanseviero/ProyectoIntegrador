@@ -13,6 +13,7 @@ from trainer import run_tf_model
 class HPTuner():
     """Creates HyperParameters tuner.
     Args:
+      output_path: Directory to save model parameters and graph.
       classification: False for regression.
       csv_path: String with the path of the CSV file for the project.
       label: Name of the label column.
@@ -23,7 +24,8 @@ class HPTuner():
       maximize: True to maximize and False to minimize.
 
     """
-    def __init__(self, classification, csv_path, label, features, space, metric, maximize):
+    def __init__(self, output_path, classification, csv_path, label, features, space, metric, maximize):
+        self.output_path = output_path
         self.classification = classification
         self.path = csv_path
         self.label = label
@@ -39,7 +41,7 @@ class HPTuner():
         if self.maximize:
             self.best_reported_metric = 0
         else:
-            self.best_reported_metric = int(math.inf)
+            self.best_reported_metric = math.inf
 
     def get_baseline(self):
         """Runs a baseline model for the data.
@@ -50,7 +52,8 @@ class HPTuner():
         Returns: A dictionary with the metrics and the hyperparameters.
         """
         hparams = HParams(batch_size=1, train_steps=1, model_type='baseline')
-        metrics = run_tf_model(hparams, self.classification, self.path, self.label, self.features)
+        metrics = run_tf_model(self.output_path+'/'+str(self.trial_id), hparams, self.classification,
+                               self.path, self.label, self.features)
 
         result = {}
         result['metrics'] = metrics
@@ -78,7 +81,8 @@ class HPTuner():
             random_hparams[hparam] = random.choice(self.space[hparam])
 
         hparams = HParams(**random_hparams)
-        metrics = run_tf_model(hparams, self.classification, self.path, self.label, self.features)
+        metrics = run_tf_model(self.output_path+'/'+str(self.trial_id), hparams, self.classification,
+                               self.path, self.label, self.features)
         result = {}
         result['metrics'] = metrics
         result['hparams'] = hparams.__dict__

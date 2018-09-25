@@ -40,7 +40,8 @@ def main():
         "model_type": ['NN', 'Linear'],
     }
 
-    tuner = HPTuner(False,
+    tuner = HPTuner('data/output/test/housing',
+    				False,
                     "data/test/housing.csv",
                     label,
                     features,
@@ -54,6 +55,7 @@ def main():
     print(tuner.generate_trial())
 
 
+    
     # Project 2 - classification
     features = [['sepal_length', 'numeric'],
                 ['sepal_width', 'numeric'],
@@ -66,7 +68,8 @@ def main():
         "model_type": ['NN', 'Linear'],
     }
 
-    tuner = HPTuner(True,
+    tuner = HPTuner('data/output/test/flowers',
+    				True,
                     "data/test/iris.csv",
                     label,
                     features,
@@ -101,7 +104,8 @@ def main():
         "model_type": ['NN', 'Linear'],
     }
 
-    tuner = HPTuner(False,
+    tuner = HPTuner('data/output/test/fifa',
+    				False,
                     "data/test/fifa_ranking.csv",
                     label,
                     features,
@@ -110,6 +114,7 @@ def main():
                     maximize=False)
     print(tuner.generate_trial())
     print(tuner.generate_trial())
+    
 
 
 if __name__ == "__main__":

@@ -58,38 +58,41 @@ def get_input_fn(features, labels, batch_size, shuffle=True):
     return input_fn
 
 
-def get_classifier_estimator(hparams, feature_columns, label_names, classes):
+def get_classifier_estimator(output_path, hparams, feature_columns, label_names, classes):
     """Creates a TF Estimator classifier based on the hyperparameters
     Args:
+      output_path: Directory to save model parameters and graph.
       hparams: A HParams object with the model hyperparameters.
       feature_columns: TensorFlow feature columns.
       label_names: A list of strings with the label names.
       classes: The number of possible classification classes.
     """
     if hparams.model_type == 'baseline':
-        return cfm.get_baseline_classifier(label_names, classes)
+        return cfm.get_baseline_classifier(output_path, label_names, classes)
     elif hparams.model_type == 'NN':
-        return cfm.get_dnn_classifier(feature_columns, label_names, classes)
+        return cfm.get_dnn_classifier(output_path, feature_columns, label_names, classes)
     elif hparams.model_type == 'Linear':
-        return cfm.get_dnn_classifier(feature_columns, label_names, classes)
+        return cfm.get_dnn_classifier(output_path, feature_columns, label_names, classes)
 
-def get_regressor_estimator(hparams, feature_columns):
+def get_regressor_estimator(output_path, hparams, feature_columns):
     """Creates a TF Estimator regressor based on the hyperparameters
     Args:
+      output_path: Directory to save model parameters and graph.
       hparams: A HParams object with the model hyperparameters.
       feature_columns: TensorFlow feature columns.
     """
     if hparams.model_type == 'baseline':
-        return rgm.get_baseline_regressor()
+        return rgm.get_baseline_regressor(output_path)
     elif hparams.model_type == 'NN':
-        return rgm.get_dnn_regressor(feature_columns)
+        return rgm.get_dnn_regressor(output_path, feature_columns)
     elif hparams.model_type == 'Linear':
-        return rgm.get_linear_regressor(feature_columns)
+        return rgm.get_linear_regressor(output_path, feature_columns)
 
 
-def run_tf_model(hparams, classification, csv_path, label, features):
+def run_tf_model(output_path, hparams, classification, csv_path, label, features):
     """Implements and trains TensorFlow estimator.
     Args:
+        output_path: Directory to save model parameters and graph.
         hparams: A HParams object with the model hyperparameters.
         classification: True for classification, False for regression.
         csv_path: String with the location of the CSV with the training data.
@@ -97,18 +100,17 @@ def run_tf_model(hparams, classification, csv_path, label, features):
         features: A list of Feature objects.
     Returns: Metrics obtained from evaluation.
     """
-    config = TrainerConfig(classification, csv_path, label, features)
+    print('Storing results from ' + hparams + ' to ' + output_path)
 
-    # TODO(osanseviero): Implement support for categorical features.
+    config = TrainerConfig(classification, csv_path, label, features)
     feature_columns = construct_feature_columns(config.features)
 
     # Configure estimator.
     if config.classification:
-        estimator = get_classifier_estimator(hparams, feature_columns, config.label_names,
+        estimator = get_classifier_estimator(output_path, hparams, feature_columns, config.label_names,
                                              config.classes)
     else:
-        estimator = get_regressor_estimator(hparams, feature_columns)
-
+        estimator = get_regressor_estimator(output_path, hparams, feature_columns)
 
     # Training and evaluation specs.
     train_spec = tf.estimator.TrainSpec(input_fn=get_input_fn(config.train_x,
