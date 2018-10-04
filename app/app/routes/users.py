@@ -56,7 +56,10 @@ def update_user_info():
         name = request.form["name"]
         username = request.form["username"]
         if email != user["email"]:
-            updates["email"] = email
+            if app.mongo.db.users.count({"email": email}):
+                error = "Email already in use"
+            else:
+                updates["email"] = email
         if name != user["name"]:
             result = re.fullmatch('[A-Za-z]+', name)
             if result:
@@ -66,8 +69,11 @@ def update_user_info():
         if username != user["username"]:
             result = re.fullmatch('[A-Za-z0-9]+', username)
             if result:
-                updates["username"] = username
-                os.rename(os.path.join(app.config["UPLOAD_FOLDER"], user["username"]), os.path.join(app.config["UPLOAD_FOLDER"], username))
+                if app.mongo.db.users.count({"username": username}):
+                    error = "Username already in use"
+                else:
+                    updates["username"] = username
+                    os.rename(os.path.join(app.config["UPLOAD_FOLDER"], user["username"]), os.path.join(app.config["UPLOAD_FOLDER"], username))
             else:
                 error = "Invalid characters in username"
         if not error:
