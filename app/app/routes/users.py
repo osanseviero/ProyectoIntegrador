@@ -76,7 +76,7 @@ def update_user_info():
                     os.rename(os.path.join(app.config["UPLOAD_FOLDER"], user["username"]), os.path.join(app.config["UPLOAD_FOLDER"], username))
             else:
                 error = "Invalid characters in username"
-        if not error:
+        if not error and updates != {}:
             app.mongo.db.users.update_one({"_id": user["_id"]}, {"$set": updates})
         return redirect(url_for("profile", error=error))
     return redirect(url_for("login", error="You must login first"))
@@ -112,10 +112,9 @@ def update_user_password():
 def delete_user():
     user = getCurrentSessionUser()
     if user:
+        from shutil import rmtree
         app.mongo.db.users.delete_one({"_id": user["_id"]})
-        path = os.path.join(app.config["UPLOAD_FOLDER"], user["username"])
-        for file in os.listdir(path):
-            os.remove(os.path.join(app.config["UPLOAD_FOLDER"], user["username"], file))
-        os.rmdir(path)
+        user_dir_path = os.path.join(app.config["UPLOAD_FOLDER"], user["username"])
+        rmtree(user_dir_path)
         return redirect(url_for("logout"))
     return redirect(url_for("login", error="You must login first"))
