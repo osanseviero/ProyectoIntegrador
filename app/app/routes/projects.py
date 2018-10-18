@@ -3,6 +3,8 @@ from flask import render_template, request, redirect, url_for
 from app import app
 from .sessions import getCurrentSessionUser
 from werkzeug.utils import secure_filename
+from ..ai.tuner import HPTuner
+
 current = {"project": None}
 
 @app.route('/projects')
@@ -40,6 +42,7 @@ def create_project():
                             filename = saveCSV(user["username"], project_name)
                             if filename:
                                 project_object = {"id": new_id, "name": project_name, "type": request.form["type"], "filename": filename, "label": label, "features": features}
+                                project_object["trials"] = train_project(user['username'], project_object, 5)
                                 app.mongo.db.users.update_one({"_id": user["_id"]}, {"$push": {"projects": project_object}})
                                 return redirect(url_for('get_project', project_id=new_id))
                             else:
@@ -73,6 +76,28 @@ def saveCSV(username, projectName):
         file.save(os.path.join(project_path, filename))
         return filename
     return None
+
+def train_project(username, project, trials_number):
+    space = {
+        "batch_size": [10, 50, 100, 200],
+        "train_steps": [100, 1000, 2000, 3000],
+        "model_type": ['NN', 'Linear'],
+    }
+    tuner = HPTuner(os.path.join(app.config['UPLOAD_FOLDER'], username, project['name'], 'models'),
+                    classification = project['type'] == 'classification',
+                    os.path.join(app.config['UPLOAD_FOLDER'], username, project['name'], project['filename']),
+                    project['label'],
+                    project['features'],
+                    space)
+    trials = []
+    for t in range(trials_number):
+        current_trial = tuner.generate_trial()
+        trials.append({
+            "id": current_trial["trial"],
+            "hyperparameters": current_trial["hparams"],
+            "metrics": current_trial["metrics"][0]
+        })
+    return trials
 
 @app.route('/projects/<int:project_id>')
 def get_project(project_id):
@@ -149,10 +174,6 @@ def delete_project():
         rmtree(project_path)
         return redirect(url_for('get_projects'))
     return redirect(url_for('login', error="You must login first"))
-
-@app.route('/projects/train', methods=["POST"])
-def train_project():
-    return "Working"
 
 @app.route('/projects/predict', methods=["POST"])
 def predict():

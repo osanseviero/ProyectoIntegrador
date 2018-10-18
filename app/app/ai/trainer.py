@@ -4,10 +4,10 @@ This functions reads CSV files and trains and evaluates a TensorFlow Estimator
 based on them.
 """
 
-from models import classifier_models as cfm
-from models import regressor_models as rgm
-from hparams import HParams
-from trainer_config import TrainerConfig
+from .models import classifier_models as cfm
+from .models import regressor_models as rgm
+from .hparams import HParams
+from .trainer_config import TrainerConfig
 import tensorflow as tf
 
 
