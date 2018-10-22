@@ -42,8 +42,10 @@ def create_project():
                             filename = saveCSV(user["username"], project_name)
                             if filename:
                                 project_object = {"id": new_id, "name": project_name, "type": request.form["type"], "filename": filename, "label": label, "features": features}
-                                project_object["trials"] = train_project(user['username'], project_object, 5)
                                 app.mongo.db.users.update_one({"_id": user["_id"]}, {"$push": {"projects": project_object}})
+                                print("\n\nHEREEEEEEE\n\n")
+                                trials_list = train_project(user['username'], project_object, 5)
+                                app.mongo.db.users.update_one({"_id": user["_id"], "projects.id": new_id}, {"$push": {"projects.$.trials": {"$each": trials_list}}})
                                 return redirect(url_for('get_project', project_id=new_id))
                             else:
                                 app.mongo.db.counters.update_one({"user_id": user["_id"], "collection": "projects"}, {"$inc": {"value": -1}})
@@ -84,7 +86,7 @@ def train_project(username, project, trials_number):
         "model_type": ['NN', 'Linear'],
     }
     tuner = HPTuner(os.path.join(app.config['UPLOAD_FOLDER'], username, project['name'], 'models'),
-                    classification = project['type'] == 'classification',
+                    project['type'] == 'classification',
                     os.path.join(app.config['UPLOAD_FOLDER'], username, project['name'], project['filename']),
                     project['label'],
                     project['features'],
