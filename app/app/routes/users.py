@@ -56,7 +56,10 @@ def update_user_info():
         name = request.form["name"]
         username = request.form["username"]
         if email != user["email"]:
-            updates["email"] = email
+            if app.mongo.db.users.count({"email": email}):
+                error = "Email already in use"
+            else:
+                updates["email"] = email
         if name != user["name"]:
             result = re.fullmatch('[A-Za-z]+', name)
             if result:
@@ -66,11 +69,14 @@ def update_user_info():
         if username != user["username"]:
             result = re.fullmatch('[A-Za-z0-9]+', username)
             if result:
-                updates["username"] = username
-                os.rename(os.path.join(app.config["UPLOAD_FOLDER"], user["username"]), os.path.join(app.config["UPLOAD_FOLDER"], username))
+                if app.mongo.db.users.count({"username": username}):
+                    error = "Username already in use"
+                else:
+                    updates["username"] = username
+                    os.rename(os.path.join(app.config["UPLOAD_FOLDER"], user["username"]), os.path.join(app.config["UPLOAD_FOLDER"], username))
             else:
                 error = "Invalid characters in username"
-        if not error:
+        if not error and updates != {}:
             app.mongo.db.users.update_one({"_id": user["_id"]}, {"$set": updates})
         return redirect(url_for("profile", error=error))
     return redirect(url_for("login", error="You must login first"))
@@ -106,10 +112,9 @@ def update_user_password():
 def delete_user():
     user = getCurrentSessionUser()
     if user:
+        from shutil import rmtree
         app.mongo.db.users.delete_one({"_id": user["_id"]})
-        path = os.path.join(app.config["UPLOAD_FOLDER"], user["username"])
-        for file in os.listdir(path):
-            os.remove(os.path.join(app.config["UPLOAD_FOLDER"], user["username"], file))
-        os.rmdir(path)
+        user_dir_path = os.path.join(app.config["UPLOAD_FOLDER"], user["username"])
+        rmtree(user_dir_path)
         return redirect(url_for("logout"))
     return redirect(url_for("login", error="You must login first"))

@@ -45,9 +45,7 @@ def main():
                     "data/test/housing.csv",
                     label,
                     features,
-                    space,
-                    'loss',
-                    maximize=False)
+                    space)
 
     print(tuner.generate_trial())
     print(tuner.generate_trial())
@@ -55,7 +53,7 @@ def main():
     print(tuner.generate_trial())
 
 
-    
+
     # Project 2 - classification
     features = [['sepal_length', 'numeric'],
                 ['sepal_width', 'numeric'],
@@ -73,9 +71,7 @@ def main():
                     "data/test/iris.csv",
                     label,
                     features,
-                    space,
-                    'accuracy',
-                    maximize=True)
+                    space)
     print(tuner.generate_trial())
     print(tuner.generate_trial())
     print(tuner.generate_trial())
@@ -109,12 +105,10 @@ def main():
                     "data/test/fifa_ranking.csv",
                     label,
                     features,
-                    space,
-                    'loss',
-                    maximize=False)
+                    space)
     print(tuner.generate_trial())
     print(tuner.generate_trial())
-    
+
 
 
 if __name__ == "__main__":

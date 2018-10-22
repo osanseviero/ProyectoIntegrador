@@ -6,8 +6,8 @@ those metrics.
 """
 import math
 import random
-from hparams import HParams
-from trainer import run_tf_model
+from .hparams import HParams
+from .trainer import run_tf_model
 
 
 class HPTuner():
@@ -21,27 +21,19 @@ class HPTuner():
                 the second element is numerical or categorical.
       space: Dictionary that maps hyperparameter to possible values.
       metric: Metric to optimize.
-      maximize: True to maximize and False to minimize.
 
     """
-    def __init__(self, output_path, classification, csv_path, label, features, space, metric, maximize):
+    def __init__(self, output_path, classification, csv_path, label, features, space):
         self.output_path = output_path
         self.classification = classification
         self.path = csv_path
         self.label = label
         self.features = features
         self.space = space
-        self.metric = metric
-        self.maximize = maximize
+        self.metric = 'accuracy' if classification else 'loss'
 
         # Keep track of current trial, best trial and best reported metric
         self.trial_id = 0
-        self.best_trial = 0
-
-        if self.maximize:
-            self.best_reported_metric = 0
-        else:
-            self.best_reported_metric = math.inf
 
     def get_baseline(self):
         """Runs a baseline model for the data.
@@ -88,16 +80,7 @@ class HPTuner():
         result['hparams'] = hparams.__dict__
         result['trial'] = self.trial_id
 
-        #TODO(osanseviero): Delete this once it's handled in Flask
         metric = metrics[0][self.metric]
-        if self.maximize:
-            if metric > self.best_reported_metric:
-                self.best_reported_metric = metric
-                self.best_trial = self.trial_id
-        else:
-            if metric < self.best_reported_metric:
-                self.best_reported_metric = metric
-                self.best_trial = self.trial_id
 
         self.trial_id = self.trial_id + 1
         return result
