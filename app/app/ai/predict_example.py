@@ -24,7 +24,7 @@ def main():
 
 
     # Predicting data
-    # House with MV 24 
+    # House with MV 24
     predict_data = {'CRIM': [0.00632],
                     'ZN': [18],
                     'INDUS': [2.309999943],
@@ -65,7 +65,7 @@ def main():
 
     predictions = predict_tf_model(model_dir, hparams, True, csv_dir, label, features, predict_data)
     print(list(predictions))
-    
+
 
 if __name__ == "__main__":
     main()

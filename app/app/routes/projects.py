@@ -4,6 +4,8 @@ from app import app
 from .sessions import getCurrentSessionUser
 from werkzeug.utils import secure_filename
 from ..ai.tuner import HPTuner
+from ..ai.hparams import HParams
+from ..ai.trainer import predict_tf_model
 
 current = {"project": None}
 
@@ -42,7 +44,7 @@ def create_project():
                             filename = saveCSV(user["username"], project_name)
                             if filename:
                                 trials_number = 5
-                                project_object = {"id": new_id, "name": project_name, "type": request.form["type"], "filename": filename, "label": label, "features": features}
+                                project_object = {"id": new_id, "name": project_name, "type": request.form["type"], "filename": filename, "label": label, "features": features, "selected_model": -1}
                                 trials_list = train_project(user['username'], project_object, trials_number)
                                 project_object["trials"] = trials_list
                                 app.mongo.db.users.update_one({"_id": user["_id"]}, {"$push": {"projects": project_object}})
@@ -172,13 +174,40 @@ def delete_project():
         from shutil import rmtree
         project_id = current["project"]["id"]
         project_name = current["project"]["name"]
-        project_filename = current["project"]["filename"]
         app.mongo.db.users.update_one({"_id": user["_id"]}, {"$pull": {"projects": {"id": project_id}}})
         project_path = os.path.join(app.config["UPLOAD_FOLDER"], user["username"], project_name)
         rmtree(project_path)
         return redirect(url_for('get_projects'))
     return redirect(url_for('login', error="You must login first"))
 
-@app.route('/projects/predict', methods=["POST"])
+@app.route('/projects/select_trial', methods=["POST"])
+def select_trial():
+    user = getCurrentSessionUser()
+    if user:
+        tid = int(request.form["id"])
+        app.mongo.db.users.update_one({"_id": user["_id"], "projects.id": current["project"]["id"]}, {"$set": {"projects.$.selected_model": tid}})
+        current["project"]["selected_model"] = tid
+    return redirect(url_for('login', error="You must login first"))
+
+@app.route('/projects/predict', methods=["GET, POST"])
 def predict():
-    return "Working"
+    user = getCurrentSessionUser()
+    if user:
+        if current["project"]["selected_model"] == -1:
+            return redirect(url_for("get_project", project_id=current["project"]["id"], error="Select model first"))
+        predictions = None
+        if request.method == "POST":
+            features = current["project"]["features"]
+            label = current["project"]["label"]
+            classification = current["project"]["type"] == "classification"
+            csv_dir = os.path.join(app.config["UPLOAD_FOLDER"], user["username"], current["project"]["name"], current["project"]["filename"])
+            model_dir = os.path.join(app.config["UPLOAD_FOLDER"], user["username"], current["project"]["name"], "models", current["project"]["selected_model"])
+            for t in current["project"]["trials"]:
+                if t["id"] == current["project"]["selected_model"]:
+                    params = t["hyperparameters"]
+            hparams = HParams(batch_size=params["batch_size"], train_steps=params["train_steps"], model_type=params["model_type"])
+            # TODO: Ver como recibir estos datos
+            predict_data = request.form["data"]
+            predictions = predict_tf_model(model_dir, hparams, classification, csv_dir, label, features, predict_data)
+        return render_template("predict.html", predictions=predictions)
+    return redirect(url_for('login', error="You must login first"))
