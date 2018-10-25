@@ -59,6 +59,14 @@ def get_input_fn(features, labels, batch_size, shuffle=True):
         return dataset.make_one_shot_iterator().get_next()
     return input_fn
 
+def get_predict_fn(features,batch_size):
+    def predict_input_fn():
+        dataset = tf.data.Dataset.from_tensor_slices(dict(features))
+        dataset = dataset.batch(batch_size)
+        return dataset.make_one_shot_iterator().get_next()
+
+    return predict_input_fn
+
 
 def get_classifier_estimator(output_path, hparams, feature_columns, label_names, classes):
     """Creates a TF Estimator classifier based on the hyperparameters
@@ -124,5 +132,33 @@ def run_tf_model(output_path, hparams, classification, csv_path, label, features
                                                             1),
                                       steps=config.evaluation_steps)
 
+
     metrics = tf.estimator.train_and_evaluate(estimator, train_spec, eval_spec)
     return metrics
+
+def predict_tf_model(model_dir, hparams, classification, csv_path, label, features, predict_df):
+    """Implements and trains TensorFlow estimator.
+    Args:
+        model_dir: Path where the model is saved
+        hparams: A HParams object with the model hyperparameters.
+        classification: True for classification, False for regression.
+        csv_path: String with the location of the CSV with the training data.
+        label: Name of the column with the label.
+        features: A list of Feature objects.
+        predict_df: Dataframe with data received by endpoint.
+    Returns: Metrics obtained from evaluation.
+    """
+    config = TrainerConfig(classification, csv_path, label, features)
+    feature_columns = construct_feature_columns(config.features)
+
+    # Configure estimator.
+    if config.classification:
+        estimator = get_classifier_estimator(model_dir, hparams, feature_columns, config.label_names,
+                                             config.classes)
+    else:
+        estimator = get_regressor_estimator(model_dir, hparams, feature_columns)
+
+    results = estimator.predict(
+        input_fn=get_predict_fn(predict_df, 1)
+    )
+    return results
