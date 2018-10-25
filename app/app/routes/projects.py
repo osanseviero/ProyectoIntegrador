@@ -41,11 +41,11 @@ def create_project():
                             new_id = autoIncrement(user["_id"], "projects")
                             filename = saveCSV(user["username"], project_name)
                             if filename:
+                                trials_number = 5
                                 project_object = {"id": new_id, "name": project_name, "type": request.form["type"], "filename": filename, "label": label, "features": features}
+                                trials_list = train_project(user['username'], project_object, trials_number)
+                                project_object["trials"] = trials_list
                                 app.mongo.db.users.update_one({"_id": user["_id"]}, {"$push": {"projects": project_object}})
-                                print("\n\nHEREEEEEEE\n\n")
-                                trials_list = train_project(user['username'], project_object, 5)
-                                app.mongo.db.users.update_one({"_id": user["_id"], "projects.id": new_id}, {"$push": {"projects.$.trials": {"$each": trials_list}}})
                                 return redirect(url_for('get_project', project_id=new_id))
                             else:
                                 app.mongo.db.counters.update_one({"user_id": user["_id"], "collection": "projects"}, {"$inc": {"value": -1}})
@@ -97,8 +97,10 @@ def train_project(username, project, trials_number):
         trials.append({
             "id": current_trial["trial"],
             "hyperparameters": current_trial["hparams"],
-            "metrics": current_trial["metrics"][0]
+            "metrics": {}
         })
+        for key, item in current_trial["metrics"][0].items():
+            trials[t]["metrics"][key] = float(item)
     return trials
 
 @app.route('/projects/<int:project_id>')
