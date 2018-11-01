@@ -42,6 +42,37 @@
                 </div>
                 <div class="col-sm-10">{{project['label']}}</div>
             </div>
+            <hr>
+            <!-- Trials -->
+            <h5>Machine learning models</h5>
+            <h6>Select a model to predict from new information</h6>
+            <div class="row">
+                {% for trial in project['trials'] %}
+                <div class="col-sm-12 col-md-4 mb-1 mt-2">
+                    <div class="card">
+                        <div class="card-header">
+                            Model: {{trial['id'] + 1}}
+                        </div>
+                        <div class="card-body p-md-2 p-sm-3">
+                            <h6 class="card-subtitle text-capitalize py-2">Hyper Parameters</h6>
+                            <ul class="list-group">
+                                {% for item in trial['hyperparameters'] %}
+                                <li class="list-group-item p-2 text-capitalize"><strong>{{item}}:</strong> {{trial['hyperparameters'][item]}}</li>
+                                {% endfor %}
+                            </ul>
+                            <h6 class="card-subtitle text-capitalize pt-3">Accuracy</h6>
+                            <p class="card-body p-1 m-0">{{'%0.4f' % (trial['metrics']['accuracy']*100) }}%</p>
+                        </div>
+                        <div class="card-footer text-right">
+                            <form action="" method="post">
+                                <input type="hidden" name="id" value="{{trial['id']}}">
+                                <button type="submit" class="btn btn-secondary">Select this model</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
             <hr/>
             <div class="text-right">
                 <button type="button" class="btn btn-danger mb-2" data-toggle="modal" data-target="#deleteUserModal"><i class="fas fa-times-circle"></i> Delete project</button>
