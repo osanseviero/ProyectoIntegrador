@@ -187,6 +187,7 @@ def select_trial():
         tid = int(request.form["id"])
         app.mongo.db.users.update_one({"_id": user["_id"], "projects.id": current["project"]["id"]}, {"$set": {"projects.$.selected_model": tid}})
         current["project"]["selected_model"] = tid
+        return redirect(url_for('get_project', project_id=current['project']['id']))
     return redirect(url_for('login', error="You must login first"))
 
 # TODO: checar que pedo con request.form["data"]
@@ -212,5 +213,5 @@ def predict():
         for t in current["project"]["trials"]:
             if t["id"] == current["project"]["selected_model"]:
                 trial = t
-        return render_template("predict.html", trial=trial, fields=current["project"]["features"])
+        return render_template("predict.html", name=user['name'], trial=trial, features=current["project"]["features"], label=current["project"]["label"])
     return redirect(url_for('login', error="You must login first"))
