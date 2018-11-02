@@ -1,5 +1,5 @@
 import os, re
-from flask import render_template, request, redirect, url_for
+from flask import render_template, request, redirect, url_for, jsonify
 from app import app
 from .sessions import getCurrentSessionUser
 from werkzeug.utils import secure_filename
@@ -189,13 +189,13 @@ def select_trial():
         current["project"]["selected_model"] = tid
     return redirect(url_for('login', error="You must login first"))
 
-@app.route('/projects/predict', methods=["GET, POST"])
+# TODO: checar que pedo con request.form["data"]
+@app.route('/projects/predict', methods=["GET", "POST"])
 def predict():
     user = getCurrentSessionUser()
     if user:
         if current["project"]["selected_model"] == -1:
             return redirect(url_for("get_project", project_id=current["project"]["id"], error="Select model first"))
-        predictions = None
         if request.method == "POST":
             features = current["project"]["features"]
             label = current["project"]["label"]
@@ -206,8 +206,11 @@ def predict():
                 if t["id"] == current["project"]["selected_model"]:
                     params = t["hyperparameters"]
             hparams = HParams(batch_size=params["batch_size"], train_steps=params["train_steps"], model_type=params["model_type"])
-            # TODO: Ver como recibir estos datos
             predict_data = request.form["data"]
             predictions = predict_tf_model(model_dir, hparams, classification, csv_dir, label, features, predict_data)
-        return render_template("predict.html", predictions=predictions)
+            return jsonify(list(predictions))
+        for t in current["project"]["trials"]:
+            if t["id"] == current["project"]["selected_model"]:
+                trial = t
+        return render_template("predict.html", trial=trial, fields=current["project"]["features"])
     return redirect(url_for('login', error="You must login first"))
