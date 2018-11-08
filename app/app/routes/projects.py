@@ -190,7 +190,6 @@ def select_trial():
         return redirect(url_for('get_project', project_id=current['project']['id']))
     return redirect(url_for('login', error="You must login first"))
 
-# TODO: checar que pedo con request.form["data"]
 @app.route('/projects/predict', methods=["GET","POST"])
 def predict():
     if request.method == "POST":
