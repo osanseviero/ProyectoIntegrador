@@ -46,6 +46,9 @@
             <!-- Trials -->
             <h5>Machine learning models</h5>
             <h6>Select a model to predict from new information</h6>
+            {% if project['selected_model'] != -1 %}
+            <p>Prediction endpoint: <a href="" id="predictionEndpoint"><span id="windowLocation"></span><span id="windowDestination">{{url_for('predict')}}</span></a></p>
+            {% endif %}
             <div class="row">
                 {% for trial in project['trials'] %}
                 <div class="col-sm-12 col-md-4 mb-1 mt-2">
@@ -64,9 +67,14 @@
                             <p class="card-body p-1 m-0">{{'%0.4f' % (trial['metrics']['accuracy']*100) }}%</p>
                         </div>
                         <div class="card-footer text-right">
-                            <form action="" method="post">
+                            <form action="{{url_for('select_trial')}}" method="post">
                                 <input type="hidden" name="id" value="{{trial['id']}}">
-                                <button type="submit" class="btn btn-secondary">Select this model</button>
+                                {% if project['selected_model'] == trial['id'] %}
+                                    <button type="submit" class="btn btn-secondary selectedModel" disabled>Currently selected</button>
+                                    <a href="{{url_for('predict')}}" class="btn btn-primary">Try it out</a>
+                                {% else %}
+                                    <button type="submit" class="btn btn-primary unselectedModel">Select this model</button>
+                                {% endif %}
                             </form>
                         </div>
                     </div>
@@ -145,27 +153,38 @@
 {% endblock %}
 {% block script %}
 <script>
-    var edit = $("#edit_view");
-    var display = $("#display_view");
-    var button = $("#change_view");
+    var edit_view = $("#edit_view");
+    var display_view = $("#display_view");
+    var view_button = $("#change_view");
 
-    edit.hide();
+    edit_view.hide();
     var state = 0;
 
-    button.click(function() {
+    view_button.click(function() {
         if (state == 0) {
             // Change to edit
             state = 1;
-            edit.show();
-            display.hide();
-            button.html("<i class='fas fa-times'></i> Cancel");
+            edit_view.show();
+            display_view.hide();
+            view_button.html("<i class='fas fa-times'></i> Cancel");
         } else {
             // Change to display
             state = 0;
-            edit.hide();
-            display.show();
-            button.html("<i class='fas fa-edit'></i> Edit profile");
+            edit_view.hide();
+            display_view.show();
+            view_button.html("<i class='fas fa-edit'></i> Edit profile");
         }
     });
+
+    $(document).ready(function(){
+        var location1 = $('#windowLocation');
+        var location2 = $('#windowDestination').html();
+        
+        var modelLink = $('#predictionEndpoint');
+
+        location1.html(window.location['origin']);
+        modelLink.attr('href', window.location['origin']+location2);
+    });
+    
 </script>
 {% endblock %}

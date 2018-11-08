@@ -1,7 +1,7 @@
-import os, re
+import os, re, json
 from flask import render_template, request, redirect, url_for, jsonify
 from app import app
-from .sessions import getCurrentSessionUser
+from .sessions import getCurrentSessionUser, getOneUser
 from werkzeug.utils import secure_filename
 from ..ai.tuner import HPTuner
 from ..ai.hparams import HParams
@@ -187,30 +187,44 @@ def select_trial():
         tid = int(request.form["id"])
         app.mongo.db.users.update_one({"_id": user["_id"], "projects.id": current["project"]["id"]}, {"$set": {"projects.$.selected_model": tid}})
         current["project"]["selected_model"] = tid
+        return redirect(url_for('get_project', project_id=current['project']['id']))
     return redirect(url_for('login', error="You must login first"))
 
 # TODO: checar que pedo con request.form["data"]
-@app.route('/projects/predict', methods=["GET", "POST"])
+@app.route('/projects/predict', methods=["GET","POST"])
 def predict():
-    user = getCurrentSessionUser()
-    if user:
-        if current["project"]["selected_model"] == -1:
-            return redirect(url_for("get_project", project_id=current["project"]["id"], error="Select model first"))
-        if request.method == "POST":
-            features = current["project"]["features"]
-            label = current["project"]["label"]
-            classification = current["project"]["type"] == "classification"
-            csv_dir = os.path.join(app.config["UPLOAD_FOLDER"], user["username"], current["project"]["name"], current["project"]["filename"])
-            model_dir = os.path.join(app.config["UPLOAD_FOLDER"], user["username"], current["project"]["name"], "models", current["project"]["selected_model"])
-            for t in current["project"]["trials"]:
-                if t["id"] == current["project"]["selected_model"]:
+    if request.method == "POST":
+        data = json.loads(request.data.decode("utf-8"))
+        if "username" in data and "p_id" in data and "data" in data:
+            user = getOneUser(data["username"], data["p_id"])
+            project = user["projects"][0]
+            if project["selected_model"] == -1:
+                return jsonify({"error":"select model first"})
+            features = project["features"]
+            label = project["label"]
+            classification = project["type"] == "classification"
+            csv_dir = os.path.join(app.config["UPLOAD_FOLDER"], user["username"], project["name"], project["filename"])
+            model_dir = os.path.join(app.config["UPLOAD_FOLDER"], user["username"], project["name"], "models", str(project["selected_model"]))
+            for t in project["trials"]:
+                if t["id"] == project["selected_model"]:
                     params = t["hyperparameters"]
             hparams = HParams(batch_size=params["batch_size"], train_steps=params["train_steps"], model_type=params["model_type"])
-            predict_data = request.form["data"]
+            predict_data = data["data"]
             predictions = predict_tf_model(model_dir, hparams, classification, csv_dir, label, features, predict_data)
-            return jsonify(list(predictions))
-        for t in current["project"]["trials"]:
-            if t["id"] == current["project"]["selected_model"]:
-                trial = t
-        return render_template("predict.html", trial=trial, fields=current["project"]["features"], label=current["project"]["label"])
-    return redirect(url_for('login', error="You must login first"))
+            predictions = list(predictions)
+            result = []
+            for p in predictions:
+                result.append({"class": p["classes"][0].decode("utf-8"), "probability": float(max(p["probabilities"]))})
+            return jsonify(result)
+        else:
+            return jsonify({"error":"missing parameters"})
+    else:
+        user = getCurrentSessionUser()
+        if user:
+            if current["project"]["selected_model"] == -1:
+                return redirect(url_for("get_project", project_id=current["project"]["id"], error="Select model first"))
+            for t in current["project"]["trials"]:
+                if t["id"] == current["project"]["selected_model"]:
+                    trial = t
+            return render_template("predict.html", name=user['name'], trial=trial, features=current["project"]["features"], label=current["project"]["label"])
+        return redirect(url_for('login', error="You must login first"))

@@ -13,6 +13,10 @@ def getCurrentSessionUser(include_projects = False):
             user = app.mongo.db.users.find_one({"_id": current_session["user_id"]}, projection)
     return user
 
+def getOneUser(username, p_id):
+    user = app.mongo.db.users.find_one({"username": username, "projects.id": p_id })
+    return user
+
 def removeSession():
     if "token" in session:
         app.mongo.db.sessions.remove({"token": session["token"]})
