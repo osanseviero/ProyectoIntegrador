@@ -38,7 +38,7 @@ def main():
                     'PT': [15.30000019],
                     'B': [396.8999939],
                     'LSTAT': [4.980000019]}
-    predict_df = pd.DataFrame.from_dict(predict_data) 
+    predict_df = pd.DataFrame.from_dict(predict_data)
 
     predictions = predict_tf_model(model_dir, hparams, False, csv_dir, label, features, predict_data)
     print(list(predictions))
