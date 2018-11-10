@@ -5,37 +5,35 @@
 {% block title %}Join us today!{% endblock %}
 {% block header %} {%include "header.html"%} {%endblock%}
 {% block content %}
-    <main role="main" class="container" style="min-height: calc(100vh - 160px)">
-        <div class="c-form-register py-5 text-center">
-            <form action="{{ url_for('register') }}" method="post" class="bg-light border border-secondary rounded p-4">
-                <h1 class="h3 pb-3">Register now!</h1>
-            <div class="form-group">
-                <label for="inputName" class="sr-only">First Name</label>
-                <input type="text" name="name" id="inputName" class="form-control" placeholder="First Name" required autofocus>
-            </div>
-            <div class="form-group">
-                <label for="inputEmail" class="sr-only">Email address</label>
-                <input type="email" name="email" id="inputEmail" class="form-control" placeholder="Email address" required>
-            </div>
-            <div class="form-group">
-                <!-- TODO: Alert user this choice is final and notify of legal chars. -->
-                <label for="inputUsername" class="sr-only">Username</label>
-                <input type="text" name="username" id="inputUsername" class="form-control" placeholder="Username" required>
-            </div>
-            <div class="form-group">
-                <!-- TODO: notify of legal chars -->
-                <label for="inputPassword" class="sr-only">Password</label>
-                <input type="password" name="password" id="inputPassword" class="form-control" placeholder="Password" required>
-                <label for="inputPasswordConfirm" class="sr-only">Confirm Password</label>
-                <input type="password" name="repassword" id="inputPasswordConfirm" class="form-control" placeholder="Confirm Password" required>
-            </div>
-            <button class="btn btn-lg btn-primary btn-block" type="submit">Register</button>
-            {% if error %}
-                <div class="alert alert-danger mt-3 mb-0">
-                    <strong>{{ error }}</strong>
-                </div>
-            {% endif %}
-            </form>
+    <div class="c-form-register py-5 text-center">
+        <form action="{{ url_for('register') }}" method="post" class="bg-light border border-secondary rounded p-4">
+            <h1 class="h3 pb-3">Register now!</h1>
+        <div class="form-group">
+            <label for="inputName" class="sr-only">First Name</label>
+            <input type="text" name="name" id="inputName" class="form-control" placeholder="First Name" required autofocus>
         </div>
-    </main>
+        <div class="form-group">
+            <label for="inputEmail" class="sr-only">Email address</label>
+            <input type="email" name="email" id="inputEmail" class="form-control" placeholder="Email address" required>
+        </div>
+        <div class="form-group">
+            <!-- TODO: Alert user this choice is final and notify of legal chars. -->
+            <label for="inputUsername" class="sr-only">Username</label>
+            <input type="text" name="username" id="inputUsername" class="form-control" placeholder="Username" required>
+        </div>
+        <div class="form-group">
+            <!-- TODO: notify of legal chars -->
+            <label for="inputPassword" class="sr-only">Password</label>
+            <input type="password" name="password" id="inputPassword" class="form-control" placeholder="Password" required>
+            <label for="inputPasswordConfirm" class="sr-only">Confirm Password</label>
+            <input type="password" name="repassword" id="inputPasswordConfirm" class="form-control" placeholder="Confirm Password" required>
+        </div>
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Register</button>
+        {% if error %}
+            <div class="alert alert-danger mt-3 mb-0">
+                <strong>{{ error }}</strong>
+            </div>
+        {% endif %}
+        </form>
+    </div>
 {% endblock %}

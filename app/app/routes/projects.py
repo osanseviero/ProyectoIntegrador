@@ -228,5 +228,5 @@ def predict():
             for t in current["project"]["trials"]:
                 if t["id"] == current["project"]["selected_model"]:
                     trial = t
-            return render_template("predict.html", name=user['name'], trial=trial, features=current["project"]["features"], label=current["project"]["label"])
+            return render_template("predict.html", name=user['username'], id=current["project"]["id"], trial=trial, features=current["project"]["features"], label=current["project"]["label"], p_type=current["project"]["type"])
         return redirect(url_for('login', error="You must login first"))

@@ -2,46 +2,73 @@
 {% block title %}Model prediction{% endblock %}
 {% block header %} {% include "header.html" %} {% endblock %}
 {% block content %}
-    <main role="main" class="container" style="min-height: calc(100vh - 160px)">
-        <h1>Model {{trial['id']+1}} </h1>
-        <h4>Let's make some predictions with new information!</h4>
+    <h1>Model {{trial['id']+1}} </h1>
+    <h4>Let's make some predictions with new information!</h4>
+    {% if p_type == "classification" %}
         <p>We expect a {{ '%0.2f' % (trial['metrics']['accuracy'] * 100) }}% accuracy in prediction from this model.</p>
-        <br>
-        <h3>Inputs</h3>
-        <form action="" id="make_prediction">
-            {% for feature in features %}
-            <div class="form-group row">
-                <label for="field_{{feature[0]}}" class="col-sm-2 col-form-label">{{feature[0]}}</label>
-                <div class="col-sm-10">
-                    <input type="text" name="{{feature[0]}}" id="field_{{feature[0]}}" class="form-control" placeholder="I'm expeting a {{feature[1]}} value.">
-                </div>
+    {% endif %}
+    <br>
+    <h3>Inputs</h3>
+    <form action="{{url_for('predict')}}" method="POST" id="predictionForm">
+        {% for feature in features %}
+        <div class="form-group row">
+            <label for="field_{{feature[0]}}" class="col-sm-3 col-form-label">{{feature[0]}}</label>
+            <div class="col-sm-9">
+                <input type="text" name="{{feature[0]}}" id="field_{{feature[0]}}" class="form-control" placeholder="I'm expeting a {{feature[1]}} value.">
             </div>
-            {% endfor %}
-            <button type="submit" class="btn btn-primary">Make prediction</button>
-        </form>
-        <br>
-        <h3>Output</h3>
-        <form action="">
-            <div class="form-group row">
-                <label for="field_{{label}}" class="col-sm-2 col-form-label">{{label}}</label>
-                <div class="col-sm-10">
-                    <input type="text" name="{{label}}" id="field_{{label}}" class="form-control" placeholder="" disabled>
-                </div>
-            </div>
-        </form>
-    </main>
+        </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary">Make prediction</button>
+    </form>
+    <br>
+    <h3>Output</h3>
+    <div class="form-group row">
+        <label for="field_{{label}}" class="col-sm-3 col-form-label">{{label}}</label>
+        <div class="col-sm-9">
+            <input type="text" name="{{label}}" id="field_label" class="form-control" placeholder="" disabled>
+        </div>
+    </div>
 {% endblock %}
 {% block script %}
 <script>
-    var prediction_form = $('#make_prediction').children('button');
+    var prediction_form = $('#predictionForm');
+    var prediction_button = prediction_form.children('button');
 
     prediction_form.submit(function (e) {
         e.preventDefault();
-        var data = {} /*concatenacion*/;
+        var formData = $("#predictionForm");
+        console.log(formData);
 
+        // form json
+        var inputs = $(e.target).find("input");
+
+        var json = {};
+        json["username"] = "{{name}}";
+        json["p_id"] = {{id}};
+        
+        var data = {};        
+        inputs.each(function() {
+            if (isNaN(this.value)) {
+                data[this.name] = [this.value];
+            } else {
+                data[this.name] = [parseFloat(this.value)];
+            }
+        });
+        json["data"] = data;
+
+        console.log(json);
         // send json (object data)
-
-        // receive json with prediction
+        $.ajax({
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            url: formData[0]["action"],
+            data: JSON.stringify(json),
+            success: function (data) {
+                $("#field_label").attr("value", data[0]["class"]);
+                console.log(data);
+            },
+            dataType: "json"
+        });
     });
 </script>
 {% endblock %}
