@@ -50,7 +50,7 @@ def main():
                 ['petal_width', 'numeric']]
 
     label = 'species'
-    model_dir = 'data/output/test/iris/2'
+    model_dir = 'data/output/test/flowers/2'
     csv_dir = 'data/test/iris.csv'
     hparams = HParams(batch_size=50, train_steps=100, model_type='Linear')
 
