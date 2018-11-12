@@ -30,7 +30,7 @@ def create_project():
         error = None
         if request.method == "POST":
             project_name = request.form["project_name"]
-            result = re.fullmatch('[A-Za-z0-9_ ]+', project_name)
+            result = re.fullmatch('[A-Za-z0-9_]+', project_name)
             if result:
                 if not app.mongo.db.users.count({"_id": user["_id"], "projects": {"$elemMatch": {"name": project_name}}}):
                     label = request.form["label"]
@@ -140,7 +140,7 @@ def update_project():
         if type != current["project"]["type"]:
             updates["projects.$.type"] = type
         if project_name != current["project"]["name"]:
-            result = re.fullmatch('[A-Za-z0-9_ ]+', project_name)
+            result = re.fullmatch('[A-Za-z0-9_]+', project_name)
             if result:
                 if not app.mongo.db.users.count({"_id": user["_id"], "projects": {"$elemMatch": {"name": project_name}}}):
                     updates["projects.$.name"] = project_name
@@ -196,6 +196,7 @@ def predict():
         data = json.loads(request.data.decode("utf-8"))
         if "username" in data and "p_id" in data and "data" in data:
             user = getOneUser(data["username"], data["p_id"])
+            # TODO: validate p_id
             project = user["projects"][0]
             if project["selected_model"] == -1:
                 return jsonify({"error":"select model first"})
@@ -203,7 +204,8 @@ def predict():
             label = project["label"]
             classification = project["type"] == "classification"
             csv_dir = os.path.join(app.config["UPLOAD_FOLDER"], user["username"], project["name"], project["filename"])
-            model_dir = os.path.join(app.config["UPLOAD_FOLDER"], user["username"], project["name"], "models", str(project["selected_model"]))
+            model_dir = os.path.join(app.config["UPLOAD_FOLDER"], user["username"], project["name"], "models", str(int(project["selected_model"])))
+            print(model_dir)
             for t in project["trials"]:
                 if t["id"] == project["selected_model"]:
                     params = t["hyperparameters"]

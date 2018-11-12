@@ -38,7 +38,7 @@ class TrainerConfig():
         self.test_y = test_df[test_df.columns[label_idx]]
 
         if classification:
-            self.label_names = list(self.train_y.unique())
+            self.label_names = sorted(list(self.train_y.unique()))
             self.classes = len(self.label_names)
             self.classification = True
         else:
