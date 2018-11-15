@@ -196,8 +196,9 @@ def predict():
         data = json.loads(request.data.decode("utf-8"))
         if "username" in data and "p_id" in data and "data" in data:
             user = getOneUser(data["username"], data["p_id"])
-            # TODO: validate p_id
-            project = user["projects"][0]
+            project = user["projects"]
+            if project is None:
+                return jsonify({"error":"No project with id: " + str(data["p_id"])})
             if project["selected_model"] == -1:
                 return jsonify({"error":"select model first"})
             features = project["features"]

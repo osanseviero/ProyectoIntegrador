@@ -14,7 +14,15 @@ def getCurrentSessionUser(include_projects = False):
     return user
 
 def getOneUser(username, p_id):
-    user = app.mongo.db.users.find_one({"username": username, "projects.id": p_id })
+    user = app.mongo.db.users.find_one({"username": username})
+    found = False
+    for p in user["projects"]:
+        if p["id"] == p_id:
+            user["projects"] = p
+            found = True
+            break
+    if not found:
+        user["projects"] = None
     return user
 
 def removeSession():
