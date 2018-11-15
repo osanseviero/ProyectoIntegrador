@@ -2,6 +2,7 @@
 {% block title %}My Projects{% endblock %}
 {% block header %} {% include "header.html" %} {% endblock %}
 {% block content %}
+<main role="main" class="container py-5">
     <h1 class="mb-4 display-4">My projects
         <a href="/projects/create" class="btn btn-primary float-right"><i class="fas fa-plus"></i> Create new</a>
     </h1>
@@ -27,4 +28,5 @@
         </div>
         {% endfor %}
     </div>
+</main>
 {% endblock %}

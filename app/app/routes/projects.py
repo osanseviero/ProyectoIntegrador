@@ -219,7 +219,7 @@ def predict():
                 if classification:
                     result.append({"class": p["classes"][0].decode("utf-8"), "probability": float(max(p["probabilities"]))})
                 else:
-                    result.append(p["predictions"][0])
+                    result.append(float(p["predictions"][0]))
             return jsonify(result)
         else:
             return jsonify({"error":"missing parameters"})
