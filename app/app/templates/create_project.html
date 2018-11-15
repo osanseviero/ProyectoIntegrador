@@ -2,6 +2,8 @@
 {% block title %}New project{% endblock %}
 {% block header %} {% include "header.html" %} {% endblock %}
 {% block content %}
+<main role="main" class="container py-5">
+
     <h1 class="mb-4 display-4">New project</h1>
     {% if error %}
     <div class="alert alert-danger mb-2">
@@ -21,29 +23,27 @@
                 <div class="col-sm-10 pt-2">
                     <div class="form-check form-check-inline">
                         <input type="radio" name="type" class="form-check-input" id="inputClassification" value="classification" checked>
-                        <label for="classification" class="form-check-label">Classification</label>
+                        <label for="classification" class="form-check-label">Classification <span data-toggle="tooltip" title="Will try to predict to which class some information belongs to. Choose this if your prediction should a string (word or words)" data-placement="bottom"><i class="far fa-question-circle"></i></span> </label>
                     </div>
                     <div class="form-check form-check-inline">
                         <input type="radio" name="type" class="form-check-input" id="inputRegression" value="regression">
-                        <label for="regression" class="form-check-label">Regression</label>
+                        <label for="regression" class="form-check-label">Regression <span data-toggle="tooltip" title="Will try to predict new values from some new information. Choose this if your prediction should be numeric" data-placement="bottom"><i class="far fa-question-circle"></i></span> </label>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="form-group row">
-            <label for="inputFile" class="col-sm-2 col-form-label">Input file</label>
-            <div class="col-sm-10 pt-1">
-                <input name="csv" type="file" class="form-control-file" id="inputFile">
-            </div>
+        <div class="custom-file mb-3">
+            <input name="csv" type="file" class="form-control-file custom-file-input" id="inputFile">
+            <label for="inputFile" class="custom-file-label">Choose input file</label>
         </div>
         <div class="form-group row">
-            <label for="inputFeatures" class="col-sm-2 col-form-label">Features <small>(column_name:type,...)</small></label>
+            <label for="inputFeatures" class="col-sm-2 col-form-label">Features <span data-toggle="tooltip" title="Columns to learn from. Example: 'column_1: numeric, column_2: string, ...' (without quotes) Column has to exists in file uploaded"><i class="far fa-question-circle"></i></span> <small>(column_name:type,...)</small></label>
             <div class="col-sm-10 pt-1">
                 <input type="text" name="features" class="form-control" id="inputFeatures" required>
             </div>
         </div>
         <div class="form-group row">
-            <label for="inputLabels" class="col-sm-2 col-form-label">Labels <small>(column_name)</small></label>
+            <label for="inputLabels" class="col-sm-2 col-form-label">Label <span data-toggle="tooltip" title="Column that will be predicted. Example: 'column_1' (without quotes) Column has to exists in file uploaded"><i class="far fa-question-circle"></i></span> <small>(column_name)</small></label>
             <div class="col-sm-10 pt-1">
                 <input type="text" name="label" class="form-control" id="inputLabels" required>
             </div>
@@ -63,8 +63,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <p>The project is being created and the models are being trained with the dataset. <span class="font-italic">This could take a while.</span></p>
-                    <p>A basic rule is that the larger the training file, the longer the wait time.</p>
+                    <p>The project is being created and the models are being trained with the dataset. <em>This could take a while.</em> (A basic rule is that the larger the training file, the longer the wait time.)</p>
                     <!-- Animated Icon -->
                     <p class="text-center">
                         <svg version="1.1" id="loader-1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="40px" height="40px" viewBox="0 0 50 50" style="enable-background:new 0 0 50 50;" xml:space="preserve">
@@ -79,19 +78,28 @@
                             </path>
                         </svg>
                     </p>
-                    <p>When finished you will automatically be redirected. Otherwise you may leave this page and check back in your projects page. Your new project will appear as soon as it is done.</p>
+                    <p><strong>When finished you will automatically be redirected.</strong> Otherwise you may leave this page and check back in your projects page. Your new project will appear as soon as this step is done.</p>
                 </div>
             </div>
         </div>
     </div>
+</main>
 {% endblock %}
 {% block script %}
 <script>
     var form = $("#createProjForm");
-    console.log(form);
     form.submit(function() {
-        console.log($(this).children("button"));
         $(this).children("button").attr("disabled", true);
+    });
+
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip()
+    });
+
+    $(".custom-file-input").on('change', function(){
+        var path = $(this).val().split("\\");
+        var filename = path[path.length - 1];
+        $(this).next('.custom-file-label').html(filename);
     });
 </script>
 {% endblock %}

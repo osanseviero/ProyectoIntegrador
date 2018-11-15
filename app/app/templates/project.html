@@ -2,6 +2,7 @@
 {% block title %}{{project['name']}}{% endblock %}
 {% block header %} {% include "header.html" %} {% endblock %}
 {% block content %}
+<main role="main" class="container py-5">
     <h1 class="mb-4 display-4">{{project['name']}}
         <button id="change_view" class="btn btn-secondary float-right"><i class="fas fa-edit"></i> Edit project</button>
     </h1>
@@ -61,8 +62,11 @@
                                 {% endfor %}
                             </ul>
                             {% if project['type'] == "classification" %}
-                                <h6 class="card-subtitle text-capitalize pt-3">Accuracy</h6>
+                                <h6 class="card-subtitle text-capitalize pt-3">Accuracy <span data-toggle="tooltip" title="More is better" data-placement="right"><i class="far fa-question-circle"></i></span></h6>
                                 <p class="card-body p-1 m-0">{{'%0.4f' % (trial['metrics']['accuracy']*100) }}%</p>
+                            {% else %}
+                                <h6 class="card-subtitle text-capitalize pt-3">Average Loss <span data-toggle="tooltip" title="Less is better" data-placement="right"><i class="far fa-question-circle"></i></span></h6>
+                                <p class="card-body p-1 m-0">{{'%0.4f' % (trial['metrics']['average_loss']) }}</p>
                             {% endif %}
                         </div>
                         <div class="card-footer text-right">
@@ -160,6 +164,7 @@
             </div>
         </div>
     </div>
+</main>
 {% endblock %}
 {% block script %}
 <script>
@@ -194,6 +199,10 @@
 
         location1.html(window.location['origin']);
         modelLink.attr('href', window.location['origin']+location2);
+
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip()
+        });
     });
     
 </script>

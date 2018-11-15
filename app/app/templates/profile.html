@@ -8,6 +8,8 @@
 {% endblock %}
 {% block header %} {% include "header.html" %} {% endblock %}
 {% block content %}
+<main role="main" class="container py-5">
+
     <h1 class="mb-4 display-4">Welcome <span class="text-capitalize">{{ user["name"] }}</span>
         <button id="change_view" class="btn btn-secondary float-right"><i class="fas fa-edit"></i> Edit profile</button>
     </h1>
@@ -124,6 +126,7 @@
             </div>
         </div>
     </div>
+</main>
 {% endblock %}
 {% block script %}
 <script>

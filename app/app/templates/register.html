@@ -5,6 +5,7 @@
 {% block title %}Join us today!{% endblock %}
 {% block header %} {%include "header.html"%} {%endblock%}
 {% block content %}
+<main role="main" class="container py-5">
     <div class="c-form-register py-5 text-center">
         <form action="{{ url_for('register') }}" method="post" class="bg-light border border-secondary rounded p-4">
             <h1 class="h3 pb-3">Register now!</h1>
@@ -36,4 +37,5 @@
         {% endif %}
         </form>
     </div>
+</main>
 {% endblock %}

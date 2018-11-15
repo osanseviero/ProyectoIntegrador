@@ -2,42 +2,70 @@
 {% block title %}Model prediction{% endblock %}
 {% block header %} {% include "header.html" %} {% endblock %}
 {% block content %}
-    <h1>Model {{trial['id']+1}} </h1>
-    <h4>Let's make some predictions with new information!</h4>
-    {% if p_type == "classification" %}
-        <p>We expect a {{ '%0.2f' % (trial['metrics']['accuracy'] * 100) }}% accuracy in prediction from this model.</p>
-    {% endif %}
-    <br>
-    <h3>Inputs</h3>
-    <form action="{{url_for('predict')}}" method="POST" id="predictionForm">
-        {% for feature in features %}
+<main role="main" class="container py-5">
+    <section class="mb-5">
+        <h1 class="display-4">Model {{trial['id']+1}} </h1>
+        <h4>Let's make some predictions with new information!</h4>
+        {% if p_type == "classification" %}
+            <p>We expect a {{ '%0.2f' % (trial['metrics']['accuracy'] * 100) }}% accuracy in prediction from this model. <em>This is an estimation and in no way a guarantee.</em></p>
+        {% else %}
+            <p>We expect a {{ '%0.2f' % (trial['metrics']['average_loss']) }} average loss in prediction from this model. <em>This is an estimation and in no way a guarantee.</em></p>
+        {% endif %}
+        <br>
+        <h3>Inputs</h3>
+        <form action="{{url_for('predict')}}" method="POST" id="predictionForm">
+            {% for feature in features %}
+            <div class="form-group row">
+                <label for="field_{{feature[0]}}" class="col-sm-3 col-form-label">{{feature[0]}}</label>
+                <div class="col-sm-9">
+                    <input type="text" name="{{feature[0]}}" id="field_{{feature[0]}}" class="form-control" placeholder="I'm expeting a {{feature[1]}} value.">
+                </div>
+            </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary">Make prediction</button>
+        </form>
+        <br>
+        <h3>Output</h3>
         <div class="form-group row">
-            <label for="field_{{feature[0]}}" class="col-sm-3 col-form-label">{{feature[0]}}</label>
+            <label for="field_{{label}}" class="col-sm-3 col-form-label">{{label}}</label>
             <div class="col-sm-9">
-                <input type="text" name="{{feature[0]}}" id="field_{{feature[0]}}" class="form-control" placeholder="I'm expeting a {{feature[1]}} value.">
+                <input type="text" name="{{label}}" id="field_label" class="form-control" placeholder="" disabled>
             </div>
         </div>
-        {% endfor %}
-        <button type="submit" class="btn btn-primary">Make prediction</button>
-    </form>
-    <br>
-    <h3>Output</h3>
-    <div class="form-group row">
-        <label for="field_{{label}}" class="col-sm-3 col-form-label">{{label}}</label>
-        <div class="col-sm-9">
-            <input type="text" name="{{label}}" id="field_label" class="form-control" placeholder="" disabled>
-        </div>
-    </div>
+    </section>
+    <hr>
+    <section class="my-5">
+        <h4>You may also make <mark>predictions just like above</mark> from new information <mark>without using this website</mark>.</h4>
+        <h5>Here's how!</h5>
+        <!-- TODO: Add mini tutorial of POST to prediction endpoint -->
+        <p>Make a POST to this page's URL. (<span id="windowURL"></span>)</p>
+        <p>You will need to send a JSON with the following appearence for this specific project:</p>
+        <pre>
+        {
+            username:"{{name}}",
+            p_id:{{id}},
+            <span id="json_example">data: {
+                {% for feature in features %} {{feature[0]}}:[ {% if feature[1] == "numeric" %}#{% else %}"string"{% endif %} ] <span class="comma"></span> 
+                {% endfor %}
+            }
+            </span>
+        }
+        </pre>
+        <p>You should expect a response that corresponds to the prediction of {{label}}.</p>
+    </section>
+</main>
 {% endblock %}
 {% block script %}
 <script>
     var prediction_form = $('#predictionForm');
     var prediction_button = prediction_form.children('button');
 
+    $("#windowURL").html(window.location.href);
+    $("#json_example span:not(:last-child)").html(",");
+
     prediction_form.submit(function (e) {
         e.preventDefault();
         var formData = $("#predictionForm");
-        console.log(formData);
 
         // form json
         var inputs = $(e.target).find("input");
@@ -64,8 +92,12 @@
             url: formData[0]["action"],
             data: JSON.stringify(json),
             success: function (data) {
-                $("#field_label").attr("value", data[0]["class"]);
-                console.log(data);
+                if ("{{p_type}}" == "classification") {
+                    $("#field_label").attr("value", data[0]["class"]);
+                } else {
+                    $("#field_label").attr("value", data[0]);
+                }
+                // console.log(data);
             },
             dataType: "json"
         });

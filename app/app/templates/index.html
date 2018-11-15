@@ -1,7 +1,50 @@
 {% extends "base.html" %}
-{% block title %}Welcome to the future{% endblock %}
+{% block title %}Easy machine learning{% endblock %}
 {% block header %} {% include "header.html" %} {% endblock %}
 {% block content %}
-	<h1>WebML</h1>
-	<h3>The future is now</h3>
+	<section class="mb-5 py-5" id="coverImg">
+		<div class="container">
+			<p class="align-bottom text-right small">Photo by rawpixel on Unsplash</p>
+			<h1 class="display-2 mb-3">Welcome to WebML</h1>
+			<h3>Machine learning made simple!</h3>
+		</div>
+	</section>
+	<main role="main" class="container">
+		<section class="my-5">
+			<h4 class="display-4 my-3">Why machine learning?</h4>
+			<div class="my-4">
+				<p class="lead">Useful for</p>
+				<ul>
+					<li>Predicting new information from historic data</li>
+					<li>Automation of processes in your business</li>
+					<li>Having the information needed to take better decisions</li>
+					<li>Generating new opportunities</li>
+				</ul>
+			</div> 
+			<div class="my-4">
+				<p class="lead">Without the common downsides!</p>
+				<p>Do it yourself!</p>
+				<ul>
+					<li>Easily</li>
+					<li>Quickly</li>
+					<li><strong>Cheaply!</strong></li>
+				</ul>
+			</div>
+		</section>
+		<section class="my-5">
+			<h3 class="display-4">Make an account and create your first machine learning project in minutes!</h3>
+			<h2></h2>
+		</section>
+	</main>
+{% endblock %}
+{% block css %}
+<style>
+	#coverImg {
+		color: white;
+		text-shadow: 0px 1px 18px #000000;
+		position:relative;
+		min-height: 65vh;
+		background: url("../static/images/cover.jpg") no-repeat scroll 0px 100% / cover transparent;
+	}
+</style>
 {% endblock %}

@@ -16,9 +16,9 @@
 </head>
 <body>
     {% block header %} {% endblock %}
-    <main role="main" class="container py-5" style="min-height: calc(100vh - 200px)">
-        {% block content %} {% endblock %}
-    </main>
+    <div style="min-height: calc(100vh - 200px)">
+    {% block content %} {% endblock %}
+    </div>
     <footer class="bg-light text-muted py-4 sticky-bottom">
         <div class="container">
             <p class="mb-5">Copyright &copy; WebML 2018</p>
